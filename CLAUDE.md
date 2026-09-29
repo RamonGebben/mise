@@ -4,9 +4,9 @@ This repo is the single source of truth for how I write code. It is reused acros
 
 ## Three parts
 
-1. **`configs/`** holds shareable config packages (Prettier, ESLint, TypeScript). This is the *enforceable* part: if a tool can check a rule, the rule goes here, not in prose.
+1. **`configs/`** holds shareable config packages (Prettier, ESLint, TypeScript). This is the _enforceable_ part: if a tool can check a rule, the rule goes here, not in prose.
 2. **`packages/`** holds publishable runtime packages (e.g. `design-system`) - real library code that projects install as a versioned dependency, rather than copy-scaffold in. Only the generic, stable shape belongs here; anything project-specific (concrete values, brand data) stays scaffolded per-project instead.
-3. **`plugins/`** holds Claude Code plugins, one per concern (e.g. `testing`). They are distributed through the marketplace in `.claude-plugin/marketplace.json`. This is the *judgment* part: principles, patterns and the reasons behind them, written as skills.
+3. **`plugins/`** holds Claude Code plugins, one per concern (e.g. `testing`). They are distributed through the marketplace in `.claude-plugin/marketplace.json`. This is the _judgment_ part: principles, patterns and the reasons behind them, written as skills.
 
 Plugins are split by concern, not by stack. Stack-specific guidance (React, Next.js, …) lives inside the plugin for the concern it's about, as its own skill where needed.
 
@@ -16,7 +16,7 @@ A plugin skill can document a `packages/` entry and scaffold the project-specifi
 
 We build this up by talking it through. I'll describe my preferences and paste in my existing configs. Your job:
 
-- Interview me one area at a time. Ask about the *why* behind each preference, not just the *what*.
+- Interview me one area at a time. Ask about the _why_ behind each preference, not just the _what_.
 - For each rule, decide first where it lives: in `configs/` (machine-checkable) or in a plugin skill (needs judgment).
 - Give every rule in a skill a short reason, and a good/bad example where it helps.
 - When a new concern comes up that doesn't fit an existing plugin, propose a new plugin for it. Don't create one without checking with me.
@@ -89,6 +89,7 @@ Every publishable thing in this repo - `configs/*`, `packages/*`, and `plugins/*
 `plugins/*` aren't npm packages: Claude Code only ever reads a plugin's version from `.claude-plugin/plugin.json`, and that's the sole signal it uses to detect an update - `marketplace.json` carries no version info at all. So each plugin folder also has a private, unpublished `package.json` (`"private": true`) purely so Changesets can track and bump it like everything else. `pnpm run version` (`changeset version`) bumps whatever changed, then runs `scripts/sync-plugin-versions.js`, which copies each plugin's `package.json` version into its `plugin.json`. Never hand-edit a plugin's version in `plugin.json` directly - it'll be overwritten by the next sync and drift from its changelog.
 
 `.github/workflows/release.yml` runs this on every push to `main`:
+
 1. If unreleased changesets exist, it opens/updates a "Version Packages" PR with the bumps, changelogs, and synced `plugin.json`s.
 2. Merging that PR runs `pnpm release`, which publishes `configs/*` and `packages/*` to npm. `plugins/*` are private, so `changeset publish` skips them - a plugin's "release" is just its version-bumped `plugin.json` landing on `main`, which is all a git-based marketplace needs.
 

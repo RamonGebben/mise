@@ -1,6 +1,6 @@
 # mise
 
-*Mise en place*: everything in its place before you start cooking.
+_Mise en place_: everything in its place before you start cooking.
 
 My personal coding conventions, reused across every project I write: the
 enforceable rules live in shared configs, judgment calls live in Claude Code
@@ -24,13 +24,13 @@ options.
 Judgment calls: principles, patterns and the reasons behind them, one plugin
 per concern, distributed through the marketplace.
 
-| Plugin | What it covers |
-| --- | --- |
-| `architecture` | Folder structure, styling and general code-style conventions |
-| `typescript` | TypeScript language conventions - type declarations, enums, narrowing |
-| `react` | React-specific component patterns and judgment calls |
-| `testing` | How I test: harness, structure and what to test |
-| `init` | Combines each installed plugin's setup skill into one plan-then-apply flow |
+| Plugin         | What it covers                                                             |
+| -------------- | -------------------------------------------------------------------------- |
+| `architecture` | Folder structure, styling and general code-style conventions               |
+| `typescript`   | TypeScript language conventions - type declarations, enums, narrowing      |
+| `react`        | React-specific component patterns and judgment calls                       |
+| `testing`      | How I test: harness, structure and what to test                            |
+| `init`         | Combines each installed plugin's setup skill into one plan-then-apply flow |
 
 ```bash
 claude plugin marketplace add RamonGebben/mise
@@ -42,11 +42,11 @@ claude plugin install testing@mise
 The enforceable part: if a tool can check a rule, it lives here, not in a
 skill.
 
-| Package | For |
-| --- | --- |
-| [`@pindakaasman/eslint-config`](configs/eslint) | ESLint |
-| [`@pindakaasman/prettier-config`](configs/prettier) | Prettier |
-| [`@pindakaasman/tsconfig`](configs/typescript) | `tsconfig.json` |
+| Package                                             | For             |
+| --------------------------------------------------- | --------------- |
+| [`@pindakaasman/eslint-config`](configs/eslint)     | ESLint          |
+| [`@pindakaasman/prettier-config`](configs/prettier) | Prettier        |
+| [`@pindakaasman/tsconfig`](configs/typescript)      | `tsconfig.json` |
 
 ```bash
 npm install -D @pindakaasman/eslint-config @pindakaasman/prettier-config @pindakaasman/tsconfig
@@ -58,10 +58,10 @@ Real library code a project installs as a dependency instead of
 copy-scaffolding in. Only the generic, stable shape lives here; anything
 project-specific stays scaffolded per-project.
 
-| Package | What it is |
-| --- | --- |
+| Package                                                 | What it is                                         |
+| ------------------------------------------------------- | -------------------------------------------------- |
 | [`@pindakaasman/design-system`](packages/design-system) | Typed, breakpoint-aware accessor over theme tokens |
-| [`@pindakaasman/mise-place`](packages/mise-place) | The bootstrap CLI used in Quick start above |
+| [`@pindakaasman/mise-place`](packages/mise-place)       | The bootstrap CLI used in Quick start above        |
 
 ## How this is built, and how it releases
 

@@ -36,6 +36,7 @@ express this split.
 
 Use `interface` when declaring the shape of an object, especially one that
 might get extended. Use `type` for unions, tuples, and mapped/utility types
+
 - anything that isn't a plain object shape.
 
 ```ts

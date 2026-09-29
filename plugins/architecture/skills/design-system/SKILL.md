@@ -16,7 +16,7 @@ type contract (`SystemTokens`, the `SystemSize`/`SystemBreakpoint`/etc.
 key-unions) are the same across every project - improving `DesignSystem` or
 adding a new accessor method should mean bumping a dependency version, not
 re-copying a file into each project and reconciling drift. Only the
-project-specific piece - actual token *values* - gets scaffolded in.
+project-specific piece - actual token _values_ - gets scaffolded in.
 
 **Why a class instead of a flat object**, unchanged from the original
 reasoning: `fontSize()` and `spacing()` resolve differently depending on the
@@ -51,7 +51,12 @@ The project file only holds concrete values and constructs the instance:
 import DesignSystem, { type SystemTokens } from '@pindakaasman/design-system';
 
 const tokens: SystemTokens = {
-  breakpoints: { mobile: '375px', tablet: '768px', tabletLandscape: '1024px', desktop: '1440px' },
+  breakpoints: {
+    mobile: '375px',
+    tablet: '768px',
+    tabletLandscape: '1024px',
+    desktop: '1440px',
+  },
   // ... the rest of your real design tokens
 };
 
@@ -79,7 +84,9 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import theme from '~/theme';
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  return <StyledThemeProvider theme={() => theme}>{children}</StyledThemeProvider>;
+  return (
+    <StyledThemeProvider theme={() => theme}>{children}</StyledThemeProvider>
+  );
 };
 ```
 

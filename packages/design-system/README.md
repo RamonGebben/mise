@@ -6,7 +6,7 @@ across projects without copy-pasting.
 
 This package ships the **class and the shape** (`SystemTokens` and the
 `SystemSize`/`SystemBreakpoint`/etc. key-unions) - not concrete token
-*values*. Every project provides its own colors, breakpoints, and spacing
+_values_. Every project provides its own colors, breakpoints, and spacing
 scale, scaffolded in and satisfying `SystemTokens`. See the `architecture`
 plugin's `design-system` skill for that scaffolding and full usage docs
 (theming conventions, the `ThemeProvider` setup, examples).
@@ -24,7 +24,12 @@ npm install @pindakaasman/design-system styled-components
 import DesignSystem, { type SystemTokens } from '@pindakaasman/design-system';
 
 const tokens: SystemTokens = {
-  breakpoints: { mobile: '375px', tablet: '768px', tabletLandscape: '1024px', desktop: '1440px' },
+  breakpoints: {
+    mobile: '375px',
+    tablet: '768px',
+    tabletLandscape: '1024px',
+    desktop: '1440px',
+  },
   // ... the rest of your real design tokens
 };
 
@@ -52,24 +57,24 @@ const Card = styled.div`
 
 ## API
 
-| Method | Params | Returns | Description |
-| --- | --- | --- | --- |
-| `color(hue, variant?)` | `hue: BaseColor`, `variant: BaseColorVariant = 'base'` | `ColorString` | Color from your palette. |
-| `gradient(variant?)` | `variant: SystemGradient = 'menu'` | `string` | Gradient from your gradient palette. |
-| `boxShadow(variant?)` | `variant: SystemBoxShadow = 'base'` | `string` | Box-shadow value. |
-| `fontSize(size)` / `fs(size)` | `size: SystemSize` | `string` (rem) | Font size for the current breakpoint. |
-| `fontWeight(weight)` / `fw(weight)` | `weight: SystemFontWeight` | `number` | Font weight. |
-| `lineHeight(selector)` / `lh(selector)` | `selector: SystemLineHeight` | `number` | Line height. |
-| `spacing(size)` / `space(size)` | `size: SystemSize` | `string` (rem) | Spacing value for the current breakpoint. |
-| `spacingBetween(a, b)` / `spaceBetween(a, b)` | `a: SystemSize, b: SystemSize` | `string` (rem) | Absolute spacing between two sizes. |
-| `bp(breakpoint)` | `breakpoint: SystemBreakpoint` | `string` | Raw breakpoint value. |
-| `z(z)` | `z: SystemZIndex` | `number` | Z-index value. |
-| `mq` | - | `MediaGenerator` | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.greaterThan('tabletLandscape')`...` `` (also `lessThan`, `between`). |
-| `getCurrentBreakpoint()` | - | `SystemBreakpoint` | Closest matching breakpoint for the current viewport. |
-| `getTokens()` | - | `SystemTokens` | The raw tokens object passed to the constructor. |
-| `remToPx(value)` | `value: number \| string` | `string` (px) | Convert rem to px, with unit. |
-| `remToPxRaw(value)` | `value: number \| string` | `number` | Convert rem to px, number only. |
-| `get(path)` | `path: string` | `unknown` | Raw property-path lookup - escape hatch, not the default way in. |
+| Method                                        | Params                                                 | Returns            | Description                                                                                                                                                          |
+| --------------------------------------------- | ------------------------------------------------------ | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `color(hue, variant?)`                        | `hue: BaseColor`, `variant: BaseColorVariant = 'base'` | `ColorString`      | Color from your palette.                                                                                                                                             |
+| `gradient(variant?)`                          | `variant: SystemGradient = 'menu'`                     | `string`           | Gradient from your gradient palette.                                                                                                                                 |
+| `boxShadow(variant?)`                         | `variant: SystemBoxShadow = 'base'`                    | `string`           | Box-shadow value.                                                                                                                                                    |
+| `fontSize(size)` / `fs(size)`                 | `size: SystemSize`                                     | `string` (rem)     | Font size for the current breakpoint.                                                                                                                                |
+| `fontWeight(weight)` / `fw(weight)`           | `weight: SystemFontWeight`                             | `number`           | Font weight.                                                                                                                                                         |
+| `lineHeight(selector)` / `lh(selector)`       | `selector: SystemLineHeight`                           | `number`           | Line height.                                                                                                                                                         |
+| `spacing(size)` / `space(size)`               | `size: SystemSize`                                     | `string` (rem)     | Spacing value for the current breakpoint.                                                                                                                            |
+| `spacingBetween(a, b)` / `spaceBetween(a, b)` | `a: SystemSize, b: SystemSize`                         | `string` (rem)     | Absolute spacing between two sizes.                                                                                                                                  |
+| `bp(breakpoint)`                              | `breakpoint: SystemBreakpoint`                         | `string`           | Raw breakpoint value.                                                                                                                                                |
+| `z(z)`                                        | `z: SystemZIndex`                                      | `number`           | Z-index value.                                                                                                                                                       |
+| `mq`                                          | -                                                      | `MediaGenerator`   | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.greaterThan('tabletLandscape')`...` `` (also `lessThan`, `between`). |
+| `getCurrentBreakpoint()`                      | -                                                      | `SystemBreakpoint` | Closest matching breakpoint for the current viewport.                                                                                                                |
+| `getTokens()`                                 | -                                                      | `SystemTokens`     | The raw tokens object passed to the constructor.                                                                                                                     |
+| `remToPx(value)`                              | `value: number \| string`                              | `string` (px)      | Convert rem to px, with unit.                                                                                                                                        |
+| `remToPxRaw(value)`                           | `value: number \| string`                              | `number`           | Convert rem to px, number only.                                                                                                                                      |
+| `get(path)`                                   | `path: string`                                         | `unknown`          | Raw property-path lookup - escape hatch, not the default way in.                                                                                                     |
 
 `SystemSize` is `'xxs' \| 'xs' \| 's' \| 'base' \| 'm' \| 'l' \| 'xl'`.
 `BaseColor`, `SystemBreakpoint`, `SystemZIndex`, `SystemBoxShadow`,

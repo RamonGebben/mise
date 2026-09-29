@@ -37,13 +37,13 @@ export default {
 
 ## What it sets
 
-| Option         | Value   | Note                                              |
-| -------------- | ------- | -------------------------------------------------- |
-| `printWidth`   | `80`    |                                                     |
-| `semi`         | `true`  |                                                     |
-| `singleQuote`  | `true`  |                                                     |
-| `trailingComma`| `'all'` |                                                     |
-| `tabWidth`     | `2`     |                                                     |
-| `useTabs`      | `false` |                                                     |
-| `bracketSpacing`| `true` |                                                     |
-| `arrowParens`  | `'avoid'` | Deliberate: bare params on single-arg arrows (`x => x`), not Prettier's current default. |
+| Option           | Value     | Note                                                                                     |
+| ---------------- | --------- | ---------------------------------------------------------------------------------------- |
+| `printWidth`     | `80`      |                                                                                          |
+| `semi`           | `true`    |                                                                                          |
+| `singleQuote`    | `true`    |                                                                                          |
+| `trailingComma`  | `'all'`   |                                                                                          |
+| `tabWidth`       | `2`       |                                                                                          |
+| `useTabs`        | `false`   |                                                                                          |
+| `bracketSpacing` | `true`    |                                                                                          |
+| `arrowParens`    | `'avoid'` | Deliberate: bare params on single-arg arrows (`x => x`), not Prettier's current default. |

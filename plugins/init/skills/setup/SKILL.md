@@ -66,7 +66,7 @@ alongside the combine-and-apply summary - don't hold it behind a separate
 approval prompt.
 
 1. Get the mise marketplace's on-disk location: `claude plugin marketplace
-   list --json`, find the entry named `mise`, read its `installLocation`.
+list --json`, find the entry named `mise`, read its `installLocation`.
 2. For each plugin from the walk above that's installed (regardless of
    whether it had a setup skill), list its skill directories under
    `<installPath>/skills/*/SKILL.md` and read each one's frontmatter `name`
@@ -90,7 +90,9 @@ approval prompt.
 
    ```markdown
    ## Conventions (via mise)
+
    <!-- mise:plugins:start -->
+
    This project uses mise's coding conventions, installed as Claude Code
    plugins. Invoke a skill as `/<plugin>:<skill>`, or let Claude reach for it
    automatically.

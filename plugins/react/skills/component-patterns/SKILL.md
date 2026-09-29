@@ -67,8 +67,19 @@ first place.
 const Dashboard = ({ isLoading, data }: Props) => {
   const renderHeader = () => <Header title="Dashboard" />;
 
-  if (isLoading) return <>{renderHeader()}<Skeleton /></>;
-  return <>{renderHeader()}<Content data={data} /></>;
+  if (isLoading)
+    return (
+      <>
+        {renderHeader()}
+        <Skeleton />
+      </>
+    );
+  return (
+    <>
+      {renderHeader()}
+      <Content data={data} />
+    </>
+  );
 };
 ```
 

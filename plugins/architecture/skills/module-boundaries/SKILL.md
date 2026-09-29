@@ -46,6 +46,7 @@ consuming project; if a project needs `SystemTokens`, that's added to
 ## Atomic tier direction
 
 Within `atoms → molecules → organisms → templates`, imports only go one way
+
 - a tier can use its own tier or anything below it, never above:
 
 ```

@@ -35,9 +35,12 @@ export function Header({ title }: { title: string }) {
 
 ```tsx
 // good
-const getTotal = (order: Order) => order.items.reduce((sum, item) => sum + item.price, 0);
+const getTotal = (order: Order) =>
+  order.items.reduce((sum, item) => sum + item.price, 0);
 
-export const Header = ({ title }: { title: string }) => <header>{title}</header>;
+export const Header = ({ title }: { title: string }) => (
+  <header>{title}</header>
+);
 ```
 
 A default export (e.g. a Next.js `page.tsx`) is declared as a `const` first,
@@ -123,7 +126,8 @@ const processOrder = (order: Order) => {
 
 ```ts
 // good - small functions, composed; no mutation
-const getTotal = (order: Order) => order.items.reduce((sum, item) => sum + item.price, 0);
+const getTotal = (order: Order) =>
+  order.items.reduce((sum, item) => sum + item.price, 0);
 const getStatus = (total: number) => (total > 0 ? 'valid' : 'empty');
 
 const processOrder = (order: Order): Order => {

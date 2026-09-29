@@ -4,12 +4,12 @@ Ramon's shared TypeScript configs. Targets TypeScript v5+.
 
 Four files, meant to be extended, not used directly:
 
-| File             | What it is                                                                                   |
-| ----------------- | ----------------------------------------------------------------------------------------------- |
-| `base.json`       | Universal strict settings (`strict`, `skipLibCheck`, `esModuleInterop`, …). Extended by the rest, rarely used alone. |
-| `app.json`        | For apps built by a bundler (extends `base.json`): `noEmit: true`, `moduleResolution: "bundler"`. |
-| `library.json`    | For packages tsc itself compiles and emits (extends `base.json`): `noEmit: false`, `declaration`, `NodeNext`, `incremental: false` (so a clean rebuild after deleting `dist/` always emits). **Placeholder** — see note below. |
-| `nextjs.json`     | For Next.js apps (extends `app.json`): `jsx: "react-jsx"`, the `next` TS plugin.               |
+| File           | What it is                                                                                                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `base.json`    | Universal strict settings (`strict`, `skipLibCheck`, `esModuleInterop`, …). Extended by the rest, rarely used alone.                                                                                                           |
+| `app.json`     | For apps built by a bundler (extends `base.json`): `noEmit: true`, `moduleResolution: "bundler"`.                                                                                                                              |
+| `library.json` | For packages tsc itself compiles and emits (extends `base.json`): `noEmit: false`, `declaration`, `NodeNext`, `incremental: false` (so a clean rebuild after deleting `dist/` always emits). **Placeholder** — see note below. |
+| `nextjs.json`  | For Next.js apps (extends `app.json`): `jsx: "react-jsx"`, the `next` TS plugin.                                                                                                                                               |
 
 > **Note on `library.json`:** no actual library tsconfig was on hand when this
 > package was built — every config Ramon had was Next.js-based. It's a

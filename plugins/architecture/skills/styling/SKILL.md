@@ -19,8 +19,9 @@ root of the app so styles inserted on the server end up in the initial HTML.
 
 > **Note:** no canonical registry implementation exists in this codebase yet -
 > the snippet below is the standard documented pattern for styled-components
-> + Next.js App Router, given here as a starting point. Confirm or adjust it
-> once it's actually wired up, then replace this note.
+>
+> - Next.js App Router, given here as a starting point. Confirm or adjust it
+>   once it's actually wired up, then replace this note.
 
 ```tsx
 // src/providers/StyledComponentsRegistry/index.tsx
@@ -30,7 +31,11 @@ import { useState, type ReactNode } from 'react';
 import { useServerInsertedHTML } from 'next/navigation';
 import { ServerStyleSheet, StyleSheetManager } from 'styled-components';
 
-export const StyledComponentsRegistry = ({ children }: { children: ReactNode }) => {
+export const StyledComponentsRegistry = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [sheet] = useState(() => new ServerStyleSheet());
 
   useServerInsertedHTML(() => {
@@ -41,6 +46,8 @@ export const StyledComponentsRegistry = ({ children }: { children: ReactNode }) 
 
   if (typeof window !== 'undefined') return <>{children}</>;
 
-  return <StyleSheetManager sheet={sheet.instance}>{children}</StyleSheetManager>;
+  return (
+    <StyleSheetManager sheet={sheet.instance}>{children}</StyleSheetManager>
+  );
 };
 ```

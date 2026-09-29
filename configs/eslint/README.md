@@ -4,11 +4,11 @@ Ramon's shared ESLint config. Flat config format, targets ESLint v9+.
 
 Three composable exports:
 
-| Export                              | What it is                                                                 |
-| ------------------------------------ | --------------------------------------------------------------------------- |
-| `@pindakaasman/eslint-config`        | Generic Node/TS base (`eslint:recommended` + `typescript-eslint` recommended + Node globals). |
-| `@pindakaasman/eslint-config/next`   | `eslint-config-next` (core-web-vitals + typescript) + Next.js build-output ignores. |
-| `@pindakaasman/eslint-config/storybook` | `eslint-plugin-storybook` recommended rules + Storybook build-output ignore. |
+| Export                                  | What it is                                                                                    |
+| --------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `@pindakaasman/eslint-config`           | Generic Node/TS base (`eslint:recommended` + `typescript-eslint` recommended + Node globals). |
+| `@pindakaasman/eslint-config/next`      | `eslint-config-next` (core-web-vitals + typescript) + Next.js build-output ignores.           |
+| `@pindakaasman/eslint-config/storybook` | `eslint-plugin-storybook` recommended rules + Storybook build-output ignore.                  |
 
 Use the base **or** `/next`, not both — `/next` already brings full TS/React
 coverage via `eslint-config-next`. Add `/storybook` on top of either when a
