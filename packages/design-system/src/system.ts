@@ -1,6 +1,22 @@
 // The type contract every consuming project's tokens object must satisfy.
 // Structure only - no values live here. Concrete token values are scaffolded
 // per-project (see the architecture plugin's design-system skill).
+//
+// Every field DesignSystem reads is required and keyed by the unions in
+// tokens.ts: a missing token is a type error here rather than a crash at
+// runtime.
+
+import type {
+  SystemBoxShadow,
+  SystemBreakpoint,
+  SystemFontWeight,
+  SystemGradient,
+  SystemLineHeight,
+  SystemSize,
+  SystemZIndex,
+} from './tokens.js';
+import type { BaseColor, BaseColorVariant } from './colorPalette.js';
+import type { ColorString } from './types.js';
 
 export interface SystemOptions {
   fontSizeUnit?: string | undefined;
@@ -10,75 +26,35 @@ export interface SystemOptionalKey {
   [prop: string]: string | number;
 }
 
-export interface SystemFontSizes {
-  xxs?: string | number;
-  xs?: string | number;
-  s: string | number;
-  base: string | number;
-  m: string | number;
-  l: string | number;
-  xl?: string | number;
-}
+/** A pixel value per size, as `'16px'` or `16`. */
+export type SystemFontSizes = Record<SystemSize, string | number>;
 
 export interface SystemType {
-  baseFontSize?: string | number;
+  baseFontSize: string | number;
   fontFamily: { [key: string]: string };
-  fontWeight: { [key: string]: number };
-  sizes?: {
-    mobile: SystemFontSizes;
-    tablet?: SystemFontSizes;
-    tabletLandscape?: SystemFontSizes;
-    desktop: SystemFontSizes;
-  };
-  lineHeight: { [key: string]: string | number };
+  fontWeight: Record<SystemFontWeight, number>;
+  sizes: Record<SystemBreakpoint, SystemFontSizes>;
+  lineHeight: Record<SystemLineHeight, number>;
 }
 
-export interface SystemBreakpoints {
-  mobile: string;
-  tablet?: string;
-  tabletLandscape?: string;
-  desktop: string;
-}
+export type SystemBreakpoints = Record<SystemBreakpoint, string>;
 
-export interface SystemColorPaletteColor {
-  base: string;
-  text: string;
-  darker: string;
-}
+export type SystemColorPaletteColor = Record<BaseColorVariant, ColorString>;
 
-export interface SystemColorPalette {
-  error: SystemColorPaletteColor;
-  formBackground: SystemColorPaletteColor;
-  background: SystemColorPaletteColor;
-  primary: SystemColorPaletteColor;
-  secondary: SystemColorPaletteColor;
-  tertiary: SystemColorPaletteColor;
-  quaternary: SystemColorPaletteColor;
-}
+export type SystemColorPalette = Record<BaseColor, SystemColorPaletteColor>;
 
 export interface SystemColor {
-  colorPalette?: SystemColorPalette;
-  gradient?: { [variant: string]: string };
+  colorPalette: SystemColorPalette;
+  gradient: Record<SystemGradient, string>;
 }
 
-export interface SystemZIndexScale {
-  [name: string]: number;
-}
+export type SystemZIndexScale = Record<SystemZIndex, number>;
 
-export type SystemScale =
-  | Array<number>
-  | Array<string>
-  | {
-      [size: string]: string | number;
-    };
+/** A pixel value per size, as `'16px'` or `16`. */
+export type SystemScale = Record<SystemSize, string | number>;
 
 export interface SystemSpacing {
-  scale?: {
-    mobile: SystemScale;
-    tablet?: SystemScale;
-    tabletLandscape?: SystemScale;
-    desktop: SystemScale;
-  };
+  scale: Record<SystemBreakpoint, SystemScale>;
 }
 
 export interface SystemBorder {
@@ -95,13 +71,13 @@ export interface SystemBorder {
 
 export interface System {
   [prop: string]: any;
-  type?: SystemType;
+  type: SystemType;
   breakpoints: SystemBreakpoints;
-  colors?: SystemColor;
-  zIndex?: SystemZIndexScale;
-  spacing?: SystemSpacing;
+  colors: SystemColor;
+  zIndex: SystemZIndexScale;
+  spacing: SystemSpacing;
   border?: SystemBorder;
-  boxShadow?: { [variant: string]: string };
+  boxShadow: Record<SystemBoxShadow, string>;
 }
 
 /** SystemTokens is System, under the name DesignSystem's constructor expects. */

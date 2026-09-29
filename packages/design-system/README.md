@@ -14,7 +14,7 @@ plugin's `design-system` skill for that scaffolding and full usage docs
 ## Install
 
 ```bash
-npm install @pindakaasman/design-system styled-media-query
+npm install @pindakaasman/design-system styled-components
 ```
 
 ## Usage

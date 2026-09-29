@@ -13,15 +13,21 @@
   },
   "files": ["dist"],
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
   },
   "dependencies": {
     "ramda": "^0.30.0",
     "styled-media-query": "^2.1.2"
   },
+  "peerDependencies": {
+    "styled-components": ">=5"
+  },
   "devDependencies": {
     "@pindakaasman/tsconfig": "workspace:*",
     "@types/ramda": "^0.30.0",
-    "typescript": "^5.0.0"
+    "styled-components": "^6.5.3",
+    "typescript": "^5.0.0",
+    "vitest": "^5.0.2"
   }
 }

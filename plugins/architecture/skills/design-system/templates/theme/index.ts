@@ -28,6 +28,8 @@ const tokens: SystemTokens = {
     },
     sizes: {
       mobile: { xxs: '10px', xs: '12px', s: '14px', base: '16px', m: '20px', l: '24px', xl: '32px' },
+      tablet: { xxs: '10px', xs: '12px', s: '14px', base: '16px', m: '22px', l: '28px', xl: '36px' },
+      tabletLandscape: { xxs: '12px', xs: '14px', s: '16px', base: '18px', m: '22px', l: '28px', xl: '40px' },
       desktop: { xxs: '12px', xs: '14px', s: '16px', base: '18px', m: '24px', l: '32px', xl: '48px' },
     },
   },
@@ -61,6 +63,8 @@ const tokens: SystemTokens = {
   spacing: {
     scale: {
       mobile: { xxs: '2px', xs: '4px', s: '8px', base: '16px', m: '24px', l: '32px', xl: '48px' },
+      tablet: { xxs: '2px', xs: '4px', s: '8px', base: '16px', m: '24px', l: '40px', xl: '56px' },
+      tabletLandscape: { xxs: '4px', xs: '8px', s: '12px', base: '20px', m: '32px', l: '40px', xl: '56px' },
       desktop: { xxs: '4px', xs: '8px', s: '12px', base: '20px', m: '32px', l: '48px', xl: '64px' },
     },
   },

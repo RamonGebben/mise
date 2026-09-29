@@ -1,4 +1,4 @@
-export { default } from './DesignSystem';
+export { default } from './DesignSystem.js';
 
 export type {
   System,
@@ -15,7 +15,7 @@ export type {
   SystemScale,
   SystemSpacing,
   SystemBorder,
-} from './system';
+} from './system.js';
 
 export type {
   SystemBreakpoint,
@@ -26,8 +26,8 @@ export type {
   SystemZIndex,
   SystemBoxShadow,
   SystemGradient,
-} from './tokens';
+} from './tokens.js';
 
-export type { BaseColor, BaseColorVariant } from './colorPalette';
+export type { BaseColor, BaseColorVariant } from './colorPalette.js';
 
-export type { ColorString } from './types';
+export type { ColorString } from './types.js';

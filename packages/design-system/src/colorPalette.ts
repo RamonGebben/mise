@@ -1,5 +1,5 @@
-// Palette keys, part of the published contract. Must match system.ts's
-// SystemColorPalette.
+// Palette keys, part of the published contract. system.ts keys
+// SystemColorPalette by these.
 
 export type BaseColor =
   | 'error'

@@ -8,7 +8,7 @@ Four files, meant to be extended, not used directly:
 | ----------------- | ----------------------------------------------------------------------------------------------- |
 | `base.json`       | Universal strict settings (`strict`, `skipLibCheck`, `esModuleInterop`, …). Extended by the rest, rarely used alone. |
 | `app.json`        | For apps built by a bundler (extends `base.json`): `noEmit: true`, `moduleResolution: "bundler"`. |
-| `library.json`    | For packages tsc itself compiles and emits (extends `base.json`): `noEmit: false`, `declaration`, `outDir: "dist"`. **Placeholder** — see note below. |
+| `library.json`    | For packages tsc itself compiles and emits (extends `base.json`): `noEmit: false`, `declaration`, `NodeNext`, `incremental: false` (so a clean rebuild after deleting `dist/` always emits). **Placeholder** — see note below. |
 | `nextjs.json`     | For Next.js apps (extends `app.json`): `jsx: "react-jsx"`, the `next` TS plugin.               |
 
 > **Note on `library.json`:** no actual library tsconfig was on hand when this
@@ -17,7 +17,7 @@ Four files, meant to be extended, not used directly:
 > `dist/`), not a stated preference. Revisit once there's a real library
 > project to derive it from.
 
-## Why no `paths`, `include`, or `exclude` in these files
+## Why no `paths`, `include`, `exclude`, `rootDir`, or `outDir` in these files
 
 Those options are relative-path-based and where they get resolved from (the
 package's own directory vs. your project's) is inconsistent across
@@ -60,6 +60,8 @@ npm install --save-dev typescript @pindakaasman/tsconfig
 {
   "extends": "@pindakaasman/tsconfig/library.json",
   "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
     "paths": {
       "~/*": ["./src/*"]
     }

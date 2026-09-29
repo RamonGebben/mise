@@ -8,11 +8,11 @@ import {
   SystemBreakpointMap,
   SystemBoxShadow,
   type SystemGradient,
-} from './tokens';
-import { BaseColor, BaseColorVariant } from './colorPalette';
-import type { SystemTokens } from './system';
+} from './tokens.js';
+import { BaseColor, BaseColorVariant } from './colorPalette.js';
+import type { SystemTokens } from './system.js';
 import { path } from 'ramda';
-import type { ColorString } from './types';
+import type { ColorString } from './types.js';
 
 export default class DesignSystem {
   private ds: SystemTokens;
@@ -42,7 +42,7 @@ export default class DesignSystem {
    */
   public fontSize(size: SystemSize): string {
     const currentBp = this.getCurrentBreakpoint();
-    const parsedValue = parseFloat(this.ds.type.sizes[currentBp][size]);
+    const parsedValue = parseFloat(`${this.ds.type.sizes[currentBp][size]}`);
 
     return this.pxToRem(parsedValue);
   }
@@ -92,7 +92,7 @@ export default class DesignSystem {
    */
   public spacing(val: SystemSize): string {
     const currentBp = this.getCurrentBreakpoint();
-    const parsedValue = parseFloat(this.ds.spacing.scale[currentBp][val]);
+    const parsedValue = parseFloat(`${this.ds.spacing.scale[currentBp][val]}`);
 
     return this.pxToRem(parsedValue);
   }
@@ -114,8 +114,8 @@ export default class DesignSystem {
   public spacingBetween(a: SystemSize, b: SystemSize): string {
     const currentBp = this.getCurrentBreakpoint();
 
-    const aValue = parseFloat(this.ds.spacing.scale[currentBp][a]);
-    const bValue = parseFloat(this.ds.spacing.scale[currentBp][b]);
+    const aValue = parseFloat(`${this.ds.spacing.scale[currentBp][a]}`);
+    const bValue = parseFloat(`${this.ds.spacing.scale[currentBp][b]}`);
 
     return this.pxToRem(Math.abs(aValue - bValue));
   }
@@ -187,7 +187,7 @@ export default class DesignSystem {
 
     const currentBp = keys.filter(
       key =>
-        global.window.matchMedia(`(max-width: ${breakpoints[key]})`).matches,
+        window.matchMedia(`(max-width: ${breakpoints[key]})`).matches,
     );
 
     return currentBp[0] || keys[keys.length - 1];
@@ -199,7 +199,7 @@ export default class DesignSystem {
    * @param value
    */
   private pxToRem(value: number) {
-    const baseFontSize = parseFloat(this.ds.type.baseFontSize);
+    const baseFontSize = parseFloat(`${this.ds.type.baseFontSize}`);
     return `${parseFloat(`${value}`) / baseFontSize}rem`;
   }
 
@@ -207,7 +207,7 @@ export default class DesignSystem {
    * Convert rem to px, including the unit `px`
    */
   public remToPx(value: number | string): string {
-    const baseFontSize = parseFloat(this.ds.type.baseFontSize);
+    const baseFontSize = parseFloat(`${this.ds.type.baseFontSize}`);
     return `${parseFloat(`${value}`) * baseFontSize}px`;
   }
 
