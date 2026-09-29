@@ -1,48 +1,14 @@
 ---
 name: styling
-description: styled-components conventions - theme tokens, SSR registry, and the Server/Client Component boundary
+description: styled-components conventions - the SSR registry and the Server/Client Component boundary. See [[design-system]] for how theme tokens are structured and accessed.
 ---
 
 # Styling
 
-Styling is styled-components.
-
-## Theme tokens, never hard-coded colors
-
-Always style from `props.theme` tokens (`theme.color.*`, `theme.shadow.*`,
-`theme.gradient.*`) - never hard-code a color, shadow, or gradient value,
-even though there's currently only one palette.
-
-**Why:** tokens still resolve through CSS custom properties, which keeps
-every color change to one file, and lets non-CSS contexts (e.g. `manifest.ts`,
-`viewport.themeColor`) import the same raw value map instead of duplicating
-hex values in a second place.
-
-```ts
-// bad - hard-coded, and duplicated the moment another file needs the same color
-const Card = styled.div`
-  background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-`;
-```
-
-```ts
-// good - resolves through the token, one source of truth
-const Card = styled.div`
-  background: ${({ theme }) => theme.color.background};
-  box-shadow: ${({ theme }) => theme.shadow.card};
-`;
-```
-
-### File layout
-
-```
-src/theme/
-  colors.ts       raw color values
-  shadows.ts      raw shadow values
-  gradients.ts    raw gradient values
-  index.ts        assembles the theme shape from the above, exports the theme + its type
-```
+Styling is styled-components. Never hard-code a color, shadow, or gradient
+value - always go through the theme, via the typed `DesignSystem` accessor
+methods documented in [[design-system]] (`theme.color()`, `theme.boxShadow()`,
+`theme.gradient()`, …), not a raw property path.
 
 ## Server/Client boundary
 

@@ -87,3 +87,25 @@ function processOrder(order: Order): Order {
   return { ...order, total, status: getStatus(total) };
 }
 ```
+
+## ramda
+
+`ramda` is the general-purpose functional-utilities library across the
+codebase - reach for it (`path`, `pick`, `omit`, `groupBy`, `pipe`, etc.)
+before hand-rolling the equivalent. `DesignSystem.get()` (see
+[[design-system]]) uses `ramda`'s `path()` for exactly this reason - it's
+already a dependency, not something added just for that one call.
+
+```ts
+// bad - reimplements what ramda already provides
+function getNested(obj: Record<string, any>, pathStr: string) {
+  return pathStr.split('.').reduce((acc, key) => acc?.[key], obj);
+}
+```
+
+```ts
+// good
+import { path } from 'ramda';
+
+const value = path(['a', 'b', 'c'], obj);
+```
