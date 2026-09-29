@@ -10,6 +10,6 @@ My personal coding conventions:
 ## Use in a project
 
 ```bash
-claude plugin marketplace add <owner>/mise
+claude plugin marketplace add RamonGebben/mise
 claude plugin install testing@mise
 ```

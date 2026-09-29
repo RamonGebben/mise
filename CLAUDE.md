@@ -44,9 +44,9 @@ plugins/<concern>/
   skills/setup/SKILL.md            set up this concern in a project
   skills/<skill>/SKILL.md          principles and patterns
 configs/
-  prettier/                        @YOUR_SCOPE/prettier-config
-  eslint/                          @YOUR_SCOPE/eslint-config
-  typescript/                      @YOUR_SCOPE/tsconfig
+  prettier/                        @pindakaasman/prettier-config
+  eslint/                          @pindakaasman/eslint-config
+  typescript/                      @pindakaasman/tsconfig
 ```
 
 ## Checks

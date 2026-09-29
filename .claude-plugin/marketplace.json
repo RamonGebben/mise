@@ -1,7 +1,7 @@
 {
   "name": "mise",
   "description": "My personal coding conventions, packaged for Claude Code",
-  "owner": { "name": "YOUR_NAME" },
+  "owner": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
   "plugins": [
     {
       "name": "testing",
