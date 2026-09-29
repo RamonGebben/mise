@@ -1,5 +1,14 @@
 {
   "name": "@pindakaasman/tsconfig",
   "version": "0.1.0",
-  "type": "module"
+  "files": ["base.json", "app.json", "library.json", "nextjs.json"],
+  "exports": {
+    "./base.json": "./base.json",
+    "./app.json": "./app.json",
+    "./library.json": "./library.json",
+    "./nextjs.json": "./nextjs.json"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
 }
