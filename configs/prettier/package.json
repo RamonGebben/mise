@@ -3,11 +3,15 @@
   "version": "0.1.1",
   "type": "module",
   "publishConfig": { "access": "public" },
+  "license": "MIT",
+  "author": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RamonGebben/mise.git",
     "directory": "configs/prettier"
   },
+  "bugs": "https://github.com/RamonGebben/mise/issues",
+  "homepage": "https://github.com/RamonGebben/mise/tree/main/configs/prettier#readme",
   "main": "./index.js",
   "exports": "./index.js",
   "files": ["index.js"],
