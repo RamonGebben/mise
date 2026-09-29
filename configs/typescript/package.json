@@ -1,6 +1,7 @@
 {
   "name": "@pindakaasman/tsconfig",
   "version": "0.1.0",
+  "publishConfig": { "access": "public" },
   "files": ["base.json", "app.json", "library.json", "nextjs.json"],
   "exports": {
     "./base.json": "./base.json",
