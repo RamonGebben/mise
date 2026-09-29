@@ -44,7 +44,7 @@ const Card = styled.div`
   box-shadow: ${({ theme }) => theme.boxShadow('card')};
   padding: ${({ theme }) => theme.spacing('base')};
 
-  ${({ theme }) => theme.mq.tabletLandscape`
+  ${({ theme }) => theme.mq.greaterThan('tabletLandscape')`
     padding: ${theme.spacing('l')};
   `}
 `;
@@ -54,7 +54,7 @@ const Card = styled.div`
 
 | Method | Params | Returns | Description |
 | --- | --- | --- | --- |
-| `color(hue, variant?)` | `hue: BaseColor`, `variant: BaseColorVariant = 'base'` | `ColorString` | Color from your palette. `hue` can be a path to traverse (e.g. `'base.background.light'`), in which case `variant` is ignored. |
+| `color(hue, variant?)` | `hue: BaseColor`, `variant: BaseColorVariant = 'base'` | `ColorString` | Color from your palette. |
 | `gradient(variant?)` | `variant: SystemGradient = 'menu'` | `string` | Gradient from your gradient palette. |
 | `boxShadow(variant?)` | `variant: SystemBoxShadow = 'base'` | `string` | Box-shadow value. |
 | `fontSize(size)` / `fs(size)` | `size: SystemSize` | `string` (rem) | Font size for the current breakpoint. |
@@ -64,7 +64,7 @@ const Card = styled.div`
 | `spacingBetween(a, b)` / `spaceBetween(a, b)` | `a: SystemSize, b: SystemSize` | `string` (rem) | Absolute spacing between two sizes. |
 | `bp(breakpoint)` | `breakpoint: SystemBreakpoint` | `string` | Raw breakpoint value. |
 | `z(z)` | `z: SystemZIndex` | `number` | Z-index value. |
-| `mq` | - | `MediaGenerator` | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.tabletLandscape`...` ``. |
+| `mq` | - | `MediaGenerator` | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.greaterThan('tabletLandscape')`...` `` (also `lessThan`, `between`). |
 | `getCurrentBreakpoint()` | - | `SystemBreakpoint` | Closest matching breakpoint for the current viewport. |
 | `getTokens()` | - | `SystemTokens` | The raw tokens object passed to the constructor. |
 | `remToPx(value)` | `value: number \| string` | `string` (px) | Convert rem to px, with unit. |

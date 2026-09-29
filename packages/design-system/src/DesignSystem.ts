@@ -133,8 +133,6 @@ export default class DesignSystem {
   /**
    * color()
    * get a color from your color palette
-   * `hue`: can contain a path to be traversed (eg: 'base.background.light'),
-   * in that case the `variant` argument is ignored
    */
   public color(
     hue: BaseColor,
@@ -153,9 +151,7 @@ export default class DesignSystem {
 
   /**
    * boxShadow()
-   * get a color from your color palette
-   * `hue`: can contain a path to be traversed (eg: 'base.background.light'),
-   * in that case the `variant` argument is ignored
+   * get a box-shadow from your box-shadow palette
    */
   public boxShadow(variant: SystemBoxShadow = 'base'): string {
     return this.ds.boxShadow[variant];
