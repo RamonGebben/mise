@@ -1,0 +1,12 @@
+{
+  "name": "conventions",
+  "description": "My personal coding conventions, packaged for Claude Code",
+  "owner": { "name": "YOUR_NAME" },
+  "plugins": [
+    {
+      "name": "testing",
+      "source": "./plugins/testing",
+      "description": "How I test: harness, structure and what to test"
+    }
+  ]
+}
