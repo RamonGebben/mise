@@ -1,6 +1,7 @@
-// Derived key-union types for DesignSystem's typed accessor methods.
-// Placeholder members - replace with your real design tokens; keep these
-// in sync with the matching value maps in theme/index.ts.
+// Key-union types for DesignSystem's typed accessor methods. These are part
+// of the published contract - a project can't invent new members without a
+// new version of this package (that's the point: consistent tokens across
+// every project that depends on it).
 
 export type SystemBreakpoint = 'mobile' | 'tablet' | 'tabletLandscape' | 'desktop';
 
@@ -12,10 +13,8 @@ export type SystemFontWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
 export type SystemLineHeight = 'tight' | 'base' | 'loose';
 
-// Note: this is a *different* type from the `SystemZIndexScale` interface
-// in theme/index.ts (that one is the `{ [name: string]: number }` map;
-// this is the union of its keys). Same root name in the pasted source -
-// kept distinct names here on purpose to avoid the collision.
+// Distinct from the `SystemZIndexScale` interface in system.ts (that one is
+// the `{ [name: string]: number }` map; this is the union of its keys).
 export type SystemZIndex = 'base' | 'dropdown' | 'sticky' | 'modal' | 'toast';
 
 export type SystemBoxShadow = 'base' | 'card' | 'modal';

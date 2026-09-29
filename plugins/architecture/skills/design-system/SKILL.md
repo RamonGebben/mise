@@ -1,40 +1,73 @@
 ---
 name: design-system
-description: The DesignSystem class - a typed, breakpoint-aware accessor over theme tokens - and how it's provided as the styled-components theme
+description: The published @pindakaasman/design-system package - a typed, breakpoint-aware accessor over theme tokens - and how it's scaffolded and provided as the styled-components theme
 ---
 
 # Design system
 
 Theming isn't a plain nested object accessed by property path
-(`theme.color.primary.base`). It's an instance of a `DesignSystem` class,
-constructed from a raw tokens object, exposing typed accessor methods.
+(`theme.color.primary.base`), and it isn't hand-copied into every project
+either. It's an instance of the `DesignSystem` class from the published
+`@pindakaasman/design-system` package (source: `packages/design-system/` in
+this repo), constructed from a tokens object each project provides.
 
-**Why a class instead of a flat object:** `fontSize()` and `spacing()`
-resolve differently depending on the current viewport (via
-`getCurrentBreakpoint()`), which a plain object can't express - there's no
-way for `theme.spacing.base` to mean something different on mobile vs.
-desktop. A class also gives every token a typed accessor (`color(hue,
+**Why a published package instead of a copy-in template:** the class and its
+type contract (`SystemTokens`, the `SystemSize`/`SystemBreakpoint`/etc.
+key-unions) are the same across every project - improving `DesignSystem` or
+adding a new accessor method should mean bumping a dependency version, not
+re-copying a file into each project and reconciling drift. Only the
+project-specific piece - actual token *values* - gets scaffolded in.
+
+**Why a class instead of a flat object**, unchanged from the original
+reasoning: `fontSize()` and `spacing()` resolve differently depending on the
+current viewport (via `getCurrentBreakpoint()`), which a plain object can't
+express. A class also gives every token a typed accessor (`color(hue,
 variant)`, `boxShadow(variant)`, …) instead of an arbitrary string path that
 only fails at runtime when it's wrong, and bundles the matching `mq` media
 query generator (from `styled-media-query`) off the same breakpoints so
 queries and token resolution never drift apart.
 
-## File layout
+## What's published vs. what's scaffolded
 
 ```
-src/theme/
-  index.ts                      SystemTokens type, the placeholder default tokens, the theme instance
-  design-system/
-    index.ts                    the DesignSystem class
-    types.ts                    ColorString and friends
-    tokens/
-      index.ts                  SystemBreakpoint, SystemSize, SystemZIndex, SystemBoxShadow, SystemGradient, …
-      colorPalette.ts           BaseColor, BaseColorVariant
+packages/design-system/          published as @pindakaasman/design-system
+  src/
+    DesignSystem.ts               the class
+    system.ts                     System/SystemTokens - the shape contract
+    tokens.ts                     SystemBreakpoint, SystemSize, SystemZIndex, SystemBoxShadow, SystemGradient, …
+    colorPalette.ts               BaseColor, BaseColorVariant
+    types.ts                      ColorString and friends
+    index.ts                      public exports
 ```
 
-Full implementation: [templates/theme/](templates/theme/). Copy it as a
-starting point, then replace the placeholder values in `theme/index.ts`
-with real design tokens - the structure is real, the colors/numbers are not.
+```
+src/theme/index.ts                scaffolded per-project, NOT published
+```
+
+The project file only holds concrete values and constructs the instance:
+
+```ts
+// src/theme/index.ts
+import DesignSystem, { type SystemTokens } from '@pindakaasman/design-system';
+
+const tokens: SystemTokens = {
+  breakpoints: { mobile: '375px', tablet: '768px', tabletLandscape: '1024px', desktop: '1440px' },
+  // ... the rest of your real design tokens
+};
+
+const theme = new DesignSystem(tokens);
+export default theme;
+```
+
+Full placeholder starting point: [templates/theme/index.ts](templates/theme/index.ts).
+Structure is real, the colors/numbers are not - replace them with your
+actual brand values.
+
+> **Roadmap note:** when the published package's `SystemTokens` shape
+> changes across a version bump, each project's scaffolded tokens file needs
+> a matching migration. The plan is to have setup/migration tooling do this
+> with AI assistance rather than by hand - not built yet, just the intended
+> direction.
 
 ## Providing the theme
 
@@ -94,28 +127,22 @@ const Card = styled.div`
 `;
 ```
 
-## Known gaps carried over from the pasted source
+## Package decisions worth knowing
 
-Two small inconsistencies were in the original code as given - fixed in the
-template with a note, flagged here in case the real codebase has since
-diverged from what was pasted:
+Two things `packages/design-system` resolves that the earlier pasted source
+had inconsistent, now fixed once at the package level rather than something
+every project needs to reconcile:
 
-- **`SystemZIndex` naming collision.** The pasted types file defines
-  `SystemZIndex` as the *map* interface (`{ [name: string]: number }`), but
-  `DesignSystem.z()` imports a type of the same name from `./tokens` and
-  uses it as a *key* into that map - which only works if it's actually a
-  key-union (`'base' | 'dropdown' | …`), a different shape entirely. The
-  template renames the map interface to `SystemZIndexScale` in
-  `theme/index.ts` to remove the collision, and keeps `SystemZIndex` as the
-  key-union in `tokens/index.ts`, matching what the class actually imports.
-- **Missing `boxShadow` and `colors.gradient` fields.** `DesignSystem`
-  reads `this.ds.boxShadow` and `this.ds.colors.gradient`, but the pasted
-  `System`/`SystemColor` interfaces didn't declare either - only `System`'s
-  top-level `[prop: string]: any` kept that from being a type error. The
-  template adds both explicitly.
+- **`SystemZIndex` naming.** `system.ts`'s map interface is named
+  `SystemZIndexScale`; `tokens.ts`'s key-union (what `DesignSystem.z()`
+  actually takes as a parameter) is `SystemZIndex`. Same root name
+  originally collided across two different shapes - kept distinct here.
+- **`boxShadow` and `colors.gradient`.** `DesignSystem` reads
+  `this.ds.boxShadow` and `this.ds.colors.gradient` - both are now declared
+  explicitly on `System`/`SystemColor` in `system.ts`.
 
 ## ramda
 
 `ramda` is used as a general functional-utilities library across the
 codebase (see [[functional-style]]), not just for `DesignSystem.get()`'s
-`path()` call.
+`path()` call. It's a regular dependency of `packages/design-system`.

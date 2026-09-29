@@ -4,14 +4,13 @@ import {
   SystemFontWeight,
   SystemLineHeight,
   SystemSize,
-  BaseColorVariant,
   SystemZIndex,
   SystemBreakpointMap,
   SystemBoxShadow,
   type SystemGradient,
 } from './tokens';
-import { BaseColor } from './tokens/colorPalette';
-import { SystemTokens } from '../';
+import { BaseColor, BaseColorVariant } from './colorPalette';
+import type { SystemTokens } from './system';
 import { path } from 'ramda';
 import type { ColorString } from './types';
 

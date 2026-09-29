@@ -1,5 +1,5 @@
-// Placeholder palette keys - replace with your real brand colors. Keys must
-// match theme/index.ts's colors.colorPalette.
+// Palette keys, part of the published contract. Must match system.ts's
+// SystemColorPalette.
 
 export type BaseColor =
   | 'error'

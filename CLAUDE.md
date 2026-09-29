@@ -2,12 +2,15 @@
 
 This repo is the single source of truth for how I write code. It is reused across all my projects. Project-specific facts belong in each project's own CLAUDE.md, never here.
 
-## Two halves
+## Three parts
 
 1. **`configs/`** holds shareable config packages (Prettier, ESLint, TypeScript). This is the *enforceable* part: if a tool can check a rule, the rule goes here, not in prose.
-2. **`plugins/`** holds Claude Code plugins, one per concern (e.g. `testing`). They are distributed through the marketplace in `.claude-plugin/marketplace.json`. This is the *judgment* part: principles, patterns and the reasons behind them, written as skills.
+2. **`packages/`** holds publishable runtime packages (e.g. `design-system`) - real library code that projects install as a versioned dependency, rather than copy-scaffold in. Only the generic, stable shape belongs here; anything project-specific (concrete values, brand data) stays scaffolded per-project instead.
+3. **`plugins/`** holds Claude Code plugins, one per concern (e.g. `testing`). They are distributed through the marketplace in `.claude-plugin/marketplace.json`. This is the *judgment* part: principles, patterns and the reasons behind them, written as skills.
 
 Plugins are split by concern, not by stack. Stack-specific guidance (React, Next.js, …) lives inside the plugin for the concern it's about, as its own skill where needed.
+
+A plugin skill can document a `packages/` entry and scaffold the project-specific pieces around it (see the `architecture` plugin's `design-system` skill), but the reverse never happens - a `packages/` entry has no knowledge of any specific plugin.
 
 ## How we work in this repo
 
@@ -51,6 +54,8 @@ configs/
   prettier/                        @pindakaasman/prettier-config
   eslint/                          @pindakaasman/eslint-config
   typescript/                      @pindakaasman/tsconfig
+packages/
+  design-system/                   @pindakaasman/design-system
 ```
 
 ## Checks
