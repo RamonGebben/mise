@@ -42,13 +42,7 @@ export default defineConfig([
   ...next,
   ...storybook,
   // Project-specific ignores go here, not in the shared package, e.g.:
-  globalIgnores([
-    '.agents/**',
-    'public/mockServiceWorker.js',
-    '.design-sync/**',
-    '.ds-sync/**',
-    'ds-bundle/**',
-  ]),
+  globalIgnores(['.agents/**', 'public/mockServiceWorker.js']),
 ]);
 ```
 
