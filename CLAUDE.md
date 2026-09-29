@@ -20,9 +20,20 @@ We build this up by talking it through. I'll describe my preferences and paste i
 - Don't invent conventions I haven't stated. If something is unclear, ask.
 - Keep things minimal. Add structure only when content needs it.
 
-## Open questions
+## Project setup
 
-- Where the project init/migration skill should live (its own plugin, or split across the concern plugins).
+Every concern plugin sets itself up through its own `setup` skill (e.g. `/testing:setup`). That skill holds all the knowledge about setting up its concern, and nothing else does. Each `setup` skill must:
+
+- **Plan, then apply.** Report the changes it would make (installs, files moved or created, refactors) without touching anything, and only apply them once approved.
+- **Be safe to re-run.** On a project that already complies, it changes nothing. The same skill handles a blank starter, migrating an existing project, and pulling in updated conventions.
+
+Recipes live in the `init` plugin (e.g. `/init:nextjs`). A recipe is only an ordered list of setup steps, with no setup knowledge of its own. It:
+
+1. checks that every plugin it needs is installed, and if not, names the install commands to run,
+2. collects the plan from each setup in order and shows one combined plan,
+3. applies the steps in order after approval.
+
+The `init` plugin gets added once there are two or more concern plugins to combine.
 
 ## Layout
 
@@ -30,7 +41,8 @@ We build this up by talking it through. I'll describe my preferences and paste i
 .claude-plugin/marketplace.json    marketplace catalog, one entry per plugin
 plugins/<concern>/
   .claude-plugin/plugin.json       plugin manifest (bump version on changes)
-  skills/<skill>/SKILL.md
+  skills/setup/SKILL.md            set up this concern in a project
+  skills/<skill>/SKILL.md          principles and patterns
 configs/
   prettier/                        @YOUR_SCOPE/prettier-config
   eslint/                          @YOUR_SCOPE/eslint-config
