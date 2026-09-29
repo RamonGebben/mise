@@ -1,4 +1,4 @@
-# conventions
+# mise
 
 This repo is the single source of truth for how I write code. It is reused across all my projects. Project-specific facts belong in each project's own CLAUDE.md, never here.
 
@@ -52,4 +52,4 @@ configs/
 ## Checks
 
 - Run `claude plugin validate .` after editing the marketplace or any plugin.
-- Test locally from another project: `claude plugin marketplace add <path-to-this-repo>`, then `claude plugin install <plugin>@conventions`.
+- Test locally from another project: `claude plugin marketplace add <path-to-this-repo>`, then `claude plugin install <plugin>@mise`.

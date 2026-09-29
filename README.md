@@ -1,4 +1,6 @@
-# conventions
+# mise
+
+*Mise en place*: everything in its place before you start cooking.
 
 My personal coding conventions:
 
@@ -8,6 +10,6 @@ My personal coding conventions:
 ## Use in a project
 
 ```bash
-claude plugin marketplace add <owner>/conventions
-claude plugin install testing@conventions
+claude plugin marketplace add <owner>/mise
+claude plugin install testing@mise
 ```
