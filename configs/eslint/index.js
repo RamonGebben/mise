@@ -4,5 +4,6 @@
 import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import rules from './rules.js';
 
-export default defineConfig([js.configs.recommended, ...tseslint.configs.recommended]);
+export default defineConfig([js.configs.recommended, ...tseslint.configs.recommended, { rules }]);

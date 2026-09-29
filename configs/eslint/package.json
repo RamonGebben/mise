@@ -8,7 +8,7 @@
     "./next": "./next.js",
     "./storybook": "./storybook.js"
   },
-  "files": ["index.js", "next.js", "storybook.js"],
+  "files": ["index.js", "next.js", "storybook.js", "rules.js"],
   "dependencies": {
     "@eslint/js": "^9.9.0",
     "typescript-eslint": "^8.0.0"
