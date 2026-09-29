@@ -1,6 +1,6 @@
 ---
 name: functional-style
-description: General code-style preferences - array methods over loops, composition, early returns
+description: General code-style preferences - arrow functions, array methods over loops, composition, early returns
 ---
 
 # Functional style
@@ -8,6 +8,50 @@ description: General code-style preferences - array methods over loops, composit
 Use functional programming patterns where they fit: higher-order functions,
 early returns, object and function composition, and array methods in place
 of imperative loops.
+
+## Arrow functions over `function`
+
+Enforced by `func-style` (`'expression'`) and `prefer-arrow-callback` in
+`@pindakaasman/eslint-config`.
+
+Write every function - helpers, hooks, React components, callbacks - as an
+arrow function assigned to a `const`. The only exception is a function that
+needs its own `this`; that one stays a `function` expression.
+
+**Why:** one way to write a function instead of two. An arrow has no `this`
+of its own, so a `function` left in the code is a signal that it genuinely
+needs one.
+
+```tsx
+// bad
+function getTotal(order: Order) {
+  return order.items.reduce((sum, item) => sum + item.price, 0);
+}
+
+export function Header({ title }: { title: string }) {
+  return <header>{title}</header>;
+}
+```
+
+```tsx
+// good
+const getTotal = (order: Order) => order.items.reduce((sum, item) => sum + item.price, 0);
+
+export const Header = ({ title }: { title: string }) => <header>{title}</header>;
+```
+
+A default export (e.g. a Next.js `page.tsx`) is declared as a `const` first,
+then exported by name:
+
+```tsx
+// good
+const DashboardPage = async () => {
+  const data = await getDashboardData();
+  return <Dashboard data={data} />;
+};
+
+export default DashboardPage;
+```
 
 ## Array methods over `for`/`while` loops
 
@@ -40,7 +84,7 @@ indentation level, instead of buried inside a pyramid of `if` blocks.
 
 ```ts
 // bad
-function getDiscount(user: User) {
+const getDiscount = (user: User) => {
   if (user.isActive) {
     if (user.isPremium) {
       return 0.2;
@@ -50,16 +94,16 @@ function getDiscount(user: User) {
   } else {
     return 0;
   }
-}
+};
 ```
 
 ```ts
 // good
-function getDiscount(user: User) {
+const getDiscount = (user: User) => {
   if (!user.isActive) return 0;
   if (user.isPremium) return 0.2;
   return 0.1;
-}
+};
 ```
 
 ## Function and object composition
@@ -70,11 +114,11 @@ existing one.
 
 ```ts
 // bad - one function doing parsing, validation and formatting; mutates input
-function processOrder(order: Order) {
+const processOrder = (order: Order) => {
   order.total = order.items.reduce((sum, item) => sum + item.price, 0);
   order.status = order.total > 0 ? 'valid' : 'empty';
   return order;
-}
+};
 ```
 
 ```ts
@@ -82,10 +126,10 @@ function processOrder(order: Order) {
 const getTotal = (order: Order) => order.items.reduce((sum, item) => sum + item.price, 0);
 const getStatus = (total: number) => (total > 0 ? 'valid' : 'empty');
 
-function processOrder(order: Order): Order {
+const processOrder = (order: Order): Order => {
   const total = getTotal(order);
   return { ...order, total, status: getStatus(total) };
-}
+};
 ```
 
 ## ramda
@@ -98,9 +142,9 @@ already a dependency, not something added just for that one call.
 
 ```ts
 // bad - reimplements what ramda already provides
-function getNested(obj: Record<string, any>, pathStr: string) {
+const getNested = (obj: Record<string, any>, pathStr: string) => {
   return pathStr.split('.').reduce((acc, key) => acc?.[key], obj);
-}
+};
 ```
 
 ```ts

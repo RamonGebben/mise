@@ -1,7 +1,7 @@
 import * as os from "node:os";
 import * as path from "node:path";
 
-export function resolveMarketplaceSource(argv: string[]): string {
+export const resolveMarketplaceSource = (argv: string[]): string => {
   const flagIndex = argv.indexOf("--marketplace");
   if (flagIndex !== -1) {
     const value = argv[flagIndex + 1];
@@ -17,4 +17,4 @@ export function resolveMarketplaceSource(argv: string[]): string {
   }
 
   return path.join(os.homedir(), "Projects", "mise");
-}
+};

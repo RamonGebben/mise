@@ -78,9 +78,9 @@ actual brand values.
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import theme from '~/theme';
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   return <StyledThemeProvider theme={() => theme}>{children}</StyledThemeProvider>;
-}
+};
 ```
 
 `theme={() => theme}` (a function, not the instance directly) rather than

@@ -29,23 +29,25 @@ longer be driven by a Storybook story with fixed inputs.
 ```tsx
 // bad - template fetches its own data, can't be driven by fixed story inputs
 // src/templates/Dashboard/index.tsx
-export function Dashboard() {
+export const Dashboard = () => {
   const { data } = useDashboardQuery();
   return <DashboardView data={data} />;
-}
+};
 ```
 
 ```tsx
 // good - page (src/app/dashboard/page.tsx) fetches, template stays pure
-export default async function DashboardPage() {
+const DashboardPage = async () => {
   const data = await getDashboardData();
   return <Dashboard data={data} />;
-}
+};
+
+export default DashboardPage;
 
 // src/templates/Dashboard/index.tsx
-export function Dashboard({ data }: { data: DashboardData }) {
+export const Dashboard = ({ data }: { data: DashboardData }) => {
   return <DashboardView data={data} />;
-}
+};
 ```
 
 ## `src/providers/`
@@ -102,7 +104,7 @@ React renderer - the Vitest `unit` project runs in Node, with no DOM.
 ```ts
 // bad - logic buried inside the hook; testing it needs a DOM renderer
 // hooks/useCountdown/index.ts
-export function useCountdown(target: Date) {
+export const useCountdown = (target: Date) => {
   const [remaining, setRemaining] = useState(0);
   useEffect(() => {
     const id = setInterval(() => {
@@ -112,26 +114,26 @@ export function useCountdown(target: Date) {
     return () => clearInterval(id);
   }, [target]);
   return remaining;
-}
+};
 ```
 
 ```ts
 // good - pure logic extracted, hook is a thin wrapper around it
 // hooks/useCountdown/getRemainingMs.ts
-export function getRemainingMs(target: Date, now: Date) {
+export const getRemainingMs = (target: Date, now: Date) => {
   const diff = target.getTime() - now.getTime();
   return diff > 0 ? diff : 0;
-}
+};
 
 // hooks/useCountdown/index.ts
-export function useCountdown(target: Date) {
+export const useCountdown = (target: Date) => {
   const [remaining, setRemaining] = useState(0);
   useEffect(() => {
     const id = setInterval(() => setRemaining(getRemainingMs(target, new Date())), 1000);
     return () => clearInterval(id);
   }, [target]);
   return remaining;
-}
+};
 
 // hooks/useCountdown/getRemainingMs.test.ts
 // tests getRemainingMs directly - no renderer needed

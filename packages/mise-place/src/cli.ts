@@ -7,25 +7,25 @@ const MARKETPLACE_NAME = "mise";
 const PLUGINS = ["typescript", "architecture", "react", "testing", "init"];
 const RECIPE_PROMPT = "/init:setup";
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
-}
+};
 
-function parseJsonArray(stdout: string): unknown[] {
+const parseJsonArray = (stdout: string): unknown[] => {
   const parsed: unknown = JSON.parse(stdout);
   return Array.isArray(parsed) ? parsed : [];
-}
+};
 
-function checkClaudeAvailable(): boolean {
+const checkClaudeAvailable = (): boolean => {
   try {
     const { status } = runCaptured("claude", ["--version"]);
     return status === 0;
   } catch {
     return false;
   }
-}
+};
 
-function isMarketplaceAdded(): boolean {
+const isMarketplaceAdded = (): boolean => {
   const { status, stdout } = runCaptured("claude", [
     "plugin",
     "marketplace",
@@ -38,9 +38,9 @@ function isMarketplaceAdded(): boolean {
   return parseJsonArray(stdout).some(
     (entry) => isRecord(entry) && entry.name === MARKETPLACE_NAME,
   );
-}
+};
 
-function installedPluginIds(): Set<string> {
+const installedPluginIds = (): Set<string> => {
   const { status, stdout } = runCaptured("claude", ["plugin", "list", "--json"]);
   if (status !== 0) {
     return new Set();
@@ -50,9 +50,9 @@ function installedPluginIds(): Set<string> {
     .map((entry) => entry.id)
     .filter((id): id is string => typeof id === "string");
   return new Set(ids);
-}
+};
 
-function ensureMarketplaceAdded(source: string): void {
+const ensureMarketplaceAdded = (source: string): void => {
   if (isMarketplaceAdded()) {
     console.log(`Marketplace "${MARKETPLACE_NAME}" already added.`);
     return;
@@ -62,9 +62,9 @@ function ensureMarketplaceAdded(source: string): void {
   if (status !== 0) {
     throw new Error(`Failed to add marketplace from ${source}`);
   }
-}
+};
 
-function ensurePluginsInstalled(): void {
+const ensurePluginsInstalled = (): void => {
   const installed = installedPluginIds();
   for (const plugin of PLUGINS) {
     const id = `${plugin}@${MARKETPLACE_NAME}`;
@@ -78,9 +78,9 @@ function ensurePluginsInstalled(): void {
       throw new Error(`Failed to install ${id}`);
     }
   }
-}
+};
 
-function main(): void {
+const main = (): void => {
   const argv = process.argv.slice(2);
 
   if (!checkClaudeAvailable()) {
@@ -98,6 +98,6 @@ function main(): void {
   console.log(`Handing off to claude with ${RECIPE_PROMPT}...`);
   const status = runInherited("claude", [RECIPE_PROMPT]);
   process.exit(status);
-}
+};
 
 main();

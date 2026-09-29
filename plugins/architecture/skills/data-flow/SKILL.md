@@ -19,10 +19,10 @@ same client-server boundary.
 ```ts
 // bad - query through tRPC, mutation through a Server Action
 const { data } = trpc.cosplan.get.useQuery({ id });
-async function updateCosplan(formData: FormData) {
+const updateCosplan = async (formData: FormData) => {
   'use server';
   // ...
-}
+};
 ```
 
 ```ts
@@ -46,15 +46,15 @@ replaced by a Suspense fallback.
 
 ```tsx
 // bad - relies on being wrapped in Suspense to show a loading state
-export function CosplanDetails({ id }: { id: string }) {
+export const CosplanDetails = ({ id }: { id: string }) => {
   const { data } = trpc.cosplan.get.useQuery({ id }); // suspends
   return <div>{data.name}</div>;
-}
+};
 ```
 
 ```tsx
 // good - loading/error are explicit props, drivable from a story
-export function CosplanDetails({
+export const CosplanDetails = ({
   cosplan,
   isLoading,
   error,
@@ -66,7 +66,7 @@ export function CosplanDetails({
   if (isLoading) return <Spinner />;
   if (error) return <ErrorState error={error} />;
   return <div>{cosplan.name}</div>;
-}
+};
 ```
 
 ## React Context - only for genuinely static values

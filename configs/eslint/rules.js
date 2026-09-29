@@ -5,6 +5,11 @@ export default {
   // Array<T> over T[] - see the typescript plugin's conventions skill.
   '@typescript-eslint/array-type': ['error', { default: 'generic' }],
   '@typescript-eslint/no-explicit-any': 'error',
+  // Arrow functions over `function` - see the architecture plugin's
+  // functional-style skill. `func-style` bans declarations; a `function`
+  // expression stays allowed for the rare case that needs its own `this`.
+  'func-style': ['error', 'expression'],
+  'prefer-arrow-callback': 'error',
   'no-restricted-syntax': [
     'error',
     {

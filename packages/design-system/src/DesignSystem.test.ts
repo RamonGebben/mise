@@ -54,19 +54,19 @@ const tokens: SystemTokens = {
 
 // Unit tests run without a DOM: fake a viewport of the given width by
 // answering `(max-width: Npx)` queries the way a browser would.
-function setViewportWidth(width: number) {
+const setViewportWidth = (width: number) => {
   vi.stubGlobal('window', {
     matchMedia: (query: string) => {
       const maxWidth = parseFloat(query.replace('(max-width:', ''));
       return { matches: width <= maxWidth };
     },
   });
-}
+};
 
 // styled-components' `css` returns an array of interpolated chunks.
-function cssText(chunks: unknown): string {
+const cssText = (chunks: unknown): string => {
   return (chunks as Array<unknown>).join('').replace(/\s+/g, ' ').trim();
-}
+};
 
 afterEach(() => {
   vi.unstubAllGlobals();

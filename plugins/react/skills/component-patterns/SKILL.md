@@ -21,14 +21,14 @@ and it's what to reach for on new code.
 
 ```tsx
 // bad - empty check doesn't account for loading; shows "no results" while fetching
-function ResultsList({ results, isLoading }: Props) {
+const ResultsList = ({ results, isLoading }: Props) => {
   return results.length === 0 ? <EmptyState /> : <List items={results} />;
-}
+};
 ```
 
 ```tsx
 // bad - loading is handled, but as a ternary chain rather than early returns
-function ResultsList({ results, isLoading }: Props) {
+const ResultsList = ({ results, isLoading }: Props) => {
   return isLoading ? (
     <Skeleton />
   ) : results.length === 0 ? (
@@ -36,16 +36,16 @@ function ResultsList({ results, isLoading }: Props) {
   ) : (
     <List items={results} />
   );
-}
+};
 ```
 
 ```tsx
 // good - guard-clause early returns, loading checked first
-function ResultsList({ results, isLoading }: Props) {
+const ResultsList = ({ results, isLoading }: Props) => {
   if (isLoading) return <Skeleton />;
   if (results.length === 0) return <EmptyState />;
   return <List items={results} />;
-}
+};
 ```
 
 ## Extract a subcomponent, not a render-body helper
@@ -57,32 +57,30 @@ named subcomponent - in that component's `components/` folder, with explicit
 props - and reuse it in each `return`.
 
 **Not** a local JSX variable (`const header = (…)`) and **not** an inline
-`function renderX()` defined in the render body. Either shape re-evaluates on
+`renderX()` helper defined in the render body. Either shape re-evaluates on
 every render with no component identity of its own, so React can't reconcile
 or memoize it independently - a sign it should have been a component in the
 first place.
 
 ```tsx
 // bad - renderHeader is redefined every render, has no identity React can track
-function Dashboard({ isLoading, data }: Props) {
-  function renderHeader() {
-    return <Header title="Dashboard" />;
-  }
+const Dashboard = ({ isLoading, data }: Props) => {
+  const renderHeader = () => <Header title="Dashboard" />;
 
   if (isLoading) return <>{renderHeader()}<Skeleton /></>;
   return <>{renderHeader()}<Content data={data} /></>;
-}
+};
 ```
 
 ```tsx
 // good - Header is a real component, reused across branches
 // components/Header/index.tsx
-export function Header({ title }: { title: string }) {
+export const Header = ({ title }: { title: string }) => {
   return <header>{title}</header>;
-}
+};
 
 // index.tsx
-function Dashboard({ isLoading, data }: Props) {
+const Dashboard = ({ isLoading, data }: Props) => {
   if (isLoading) {
     return (
       <>
@@ -97,5 +95,5 @@ function Dashboard({ isLoading, data }: Props) {
       <Content data={data} />
     </>
   );
-}
+};
 ```

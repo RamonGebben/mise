@@ -20,12 +20,12 @@ type (`Array<Record<string, User>>` vs. `Record<string, User>[]`).
 
 ```ts
 // bad
-function getNames(users: User[]): string[] { ... }
+const getNames = (users: User[]): string[] => { ... };
 ```
 
 ```ts
 // good
-function getNames(users: Array<User>): Array<string> { ... }
+const getNames = (users: Array<User>): Array<string> => { ... };
 ```
 
 ## `interface` for object shapes, `type` for everything else
@@ -69,17 +69,17 @@ right at the boundary where untyped data enters (an API response,
 
 ```ts
 // bad - any silently propagates past the boundary
-function parseConfig(raw: any) {
+const parseConfig = (raw: any) => {
   return raw.settings.theme; // no error, even if raw has no `settings`
-}
+};
 ```
 
 ```ts
 // good - unknown forces a check before use
-function parseConfig(raw: unknown) {
+const parseConfig = (raw: unknown) => {
   if (!isConfig(raw)) throw new Error('invalid config');
   return raw.settings.theme; // now typed
-}
+};
 ```
 
 ## Union literals over `enum`

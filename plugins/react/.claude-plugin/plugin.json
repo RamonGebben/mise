@@ -1,6 +1,6 @@
 {
   "name": "react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React-specific component patterns and judgment calls",
   "author": { "name": "Ramon Gebben" }
 }
