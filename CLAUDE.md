@@ -46,8 +46,11 @@ The `init` plugin gets added once there are two or more concern plugins to combi
 
 ```
 .claude-plugin/marketplace.json    marketplace catalog, one entry per plugin
+.github/workflows/release.yml      changesets version/publish on push to main
+scripts/sync-plugin-versions.js    copies plugin package.json version -> plugin.json
 plugins/<concern>/
-  .claude-plugin/plugin.json       plugin manifest (bump version on changes)
+  package.json                     private, version source of truth for Changesets
+  .claude-plugin/plugin.json       plugin manifest (version synced, don't hand-edit)
   skills/setup/SKILL.md            set up this concern in a project
   skills/<skill>/SKILL.md          principles and patterns
 configs/
@@ -62,3 +65,15 @@ packages/
 
 - Run `claude plugin validate .` after editing the marketplace or any plugin.
 - Test locally from another project: `claude plugin marketplace add <path-to-this-repo>`, then `claude plugin install <plugin>@mise`.
+
+## Release automation
+
+Every publishable thing in this repo - `configs/*`, `packages/*`, and `plugins/*` - is versioned independently through [Changesets](https://github.com/changesets/changesets), not git tags. Run `pnpm changeset` after a change that should ship, describe it, and let it pick the affected package(s) and bump type.
+
+`plugins/*` aren't npm packages: Claude Code only ever reads a plugin's version from `.claude-plugin/plugin.json`, and that's the sole signal it uses to detect an update - `marketplace.json` carries no version info at all. So each plugin folder also has a private, unpublished `package.json` (`"private": true`) purely so Changesets can track and bump it like everything else. `pnpm run version` (`changeset version`) bumps whatever changed, then runs `scripts/sync-plugin-versions.js`, which copies each plugin's `package.json` version into its `plugin.json`. Never hand-edit a plugin's version in `plugin.json` directly - it'll be overwritten by the next sync and drift from its changelog.
+
+`.github/workflows/release.yml` runs this on every push to `main`:
+1. If unreleased changesets exist, it opens/updates a "Version Packages" PR with the bumps, changelogs, and synced `plugin.json`s.
+2. Merging that PR runs `pnpm release`, which publishes `configs/*` and `packages/*` to npm. `plugins/*` are private, so `changeset publish` skips them - a plugin's "release" is just its version-bumped `plugin.json` landing on `main`, which is all a git-based marketplace needs.
+
+Requires an `NPM_TOKEN` secret (npm automation token, publish access to the `@pindakaasman` scope) in the repo's GitHub Actions secrets.

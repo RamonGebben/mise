@@ -1,7 +1,12 @@
 {
   "name": "@pindakaasman/tsconfig",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publishConfig": { "access": "public" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RamonGebben/mise.git",
+    "directory": "configs/typescript"
+  },
   "files": ["base.json", "app.json", "library.json", "nextjs.json"],
   "exports": {
     "./base.json": "./base.json",

@@ -79,6 +79,16 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  plugins/architecture: {}
+
+  plugins/init: {}
+
+  plugins/react: {}
+
+  plugins/testing: {}
+
+  plugins/typescript: {}
+
 packages:
 
   '@babel/code-frame@7.29.7':
