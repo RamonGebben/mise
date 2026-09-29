@@ -1,6 +1,6 @@
 {
   "name": "testing",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "How I test: harness, structure and what to test",
   "author": { "name": "Ramon Gebben" }
 }
