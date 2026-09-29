@@ -9,6 +9,11 @@
       "description": "Folder structure, styling and general code-style conventions"
     },
     {
+      "name": "init",
+      "source": "./plugins/init",
+      "description": "Combine each installed mise plugin's setup skill into one plan-then-apply flow"
+    },
+    {
       "name": "react",
       "source": "./plugins/react",
       "description": "React-specific component patterns and judgment calls"

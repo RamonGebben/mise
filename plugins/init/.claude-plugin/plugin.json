@@ -1,0 +1,6 @@
+{
+  "name": "init",
+  "version": "0.2.3",
+  "description": "Combine each installed mise plugin's setup skill into one plan-then-apply flow",
+  "author": { "name": "Ramon Gebben" }
+}

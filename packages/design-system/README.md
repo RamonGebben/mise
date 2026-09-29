@@ -32,6 +32,57 @@ const theme = new DesignSystem(tokens);
 export default theme;
 ```
 
+## Accessing tokens
+
+Every token goes through a typed method - never a hard-coded value, and
+never a raw property-path string (`theme.get(...)` is an escape hatch for
+the rare case nothing else covers, not the default way in):
+
+```ts
+const Card = styled.div`
+  background: ${({ theme }) => theme.color('background')};
+  box-shadow: ${({ theme }) => theme.boxShadow('card')};
+  padding: ${({ theme }) => theme.spacing('base')};
+
+  ${({ theme }) => theme.mq.tabletLandscape`
+    padding: ${theme.spacing('l')};
+  `}
+`;
+```
+
+## API
+
+| Method | Params | Returns | Description |
+| --- | --- | --- | --- |
+| `color(hue, variant?)` | `hue: BaseColor`, `variant: BaseColorVariant = 'base'` | `ColorString` | Color from your palette. `hue` can be a path to traverse (e.g. `'base.background.light'`), in which case `variant` is ignored. |
+| `gradient(variant?)` | `variant: SystemGradient = 'menu'` | `string` | Gradient from your gradient palette. |
+| `boxShadow(variant?)` | `variant: SystemBoxShadow = 'base'` | `string` | Box-shadow value. |
+| `fontSize(size)` / `fs(size)` | `size: SystemSize` | `string` (rem) | Font size for the current breakpoint. |
+| `fontWeight(weight)` / `fw(weight)` | `weight: SystemFontWeight` | `number` | Font weight. |
+| `lineHeight(selector)` / `lh(selector)` | `selector: SystemLineHeight` | `number` | Line height. |
+| `spacing(size)` / `space(size)` | `size: SystemSize` | `string` (rem) | Spacing value for the current breakpoint. |
+| `spacingBetween(a, b)` / `spaceBetween(a, b)` | `a: SystemSize, b: SystemSize` | `string` (rem) | Absolute spacing between two sizes. |
+| `bp(breakpoint)` | `breakpoint: SystemBreakpoint` | `string` | Raw breakpoint value. |
+| `z(z)` | `z: SystemZIndex` | `number` | Z-index value. |
+| `mq` | - | `MediaGenerator` | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.tabletLandscape`...` ``. |
+| `getCurrentBreakpoint()` | - | `SystemBreakpoint` | Closest matching breakpoint for the current viewport. |
+| `getTokens()` | - | `SystemTokens` | The raw tokens object passed to the constructor. |
+| `remToPx(value)` | `value: number \| string` | `string` (px) | Convert rem to px, with unit. |
+| `remToPxRaw(value)` | `value: number \| string` | `number` | Convert rem to px, number only. |
+| `get(path)` | `path: string` | `unknown` | Raw property-path lookup - escape hatch, not the default way in. |
+
+`SystemSize` is `'xxs' \| 'xs' \| 's' \| 'base' \| 'm' \| 'l' \| 'xl'`.
+`BaseColor`, `SystemBreakpoint`, `SystemZIndex`, `SystemBoxShadow`,
+`SystemGradient`, `SystemFontWeight` and `SystemLineHeight` are the other
+key-unions each accessor takes - all exported from the package, all part of
+the published contract (see [`src/tokens.ts`](src/tokens.ts) and
+[`src/colorPalette.ts`](src/colorPalette.ts) for the exact members).
+
+For how this gets scaffolded and provided as a `styled-components` theme in
+a real project (the `ThemeProvider` wiring, SSR registry, per-project token
+values), see the `architecture` plugin's `design-system` skill
+(`/architecture:design-system`).
+
 ## Build
 
 ```bash

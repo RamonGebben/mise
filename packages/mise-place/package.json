@@ -1,0 +1,18 @@
+{
+  "name": "@pindakaasman/mise-place",
+  "version": "0.1.0",
+  "type": "module",
+  "publishConfig": { "access": "public" },
+  "main": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
+  "bin": { "mise-place": "./dist/cli.js" },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@pindakaasman/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}
