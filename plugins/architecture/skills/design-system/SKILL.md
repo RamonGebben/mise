@@ -121,7 +121,7 @@ const Card = styled.div`
   box-shadow: ${({ theme }) => theme.boxShadow('card')};
   padding: ${({ theme }) => theme.spacing('base')};
 
-  ${({ theme }) => theme.mq.tabletLandscape`
+  ${({ theme }) => theme.mq.greaterThan('tabletLandscape')`
     padding: ${theme.spacing('l')};
   `}
 `;
