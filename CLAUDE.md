@@ -20,6 +20,10 @@ We build this up by talking it through. I'll describe my preferences and paste i
 - Don't invent conventions I haven't stated. If something is unclear, ask.
 - Keep things minimal. Add structure only when content needs it.
 
+## Git commits & PRs
+
+Never add AI attribution to commit messages or PR descriptions (no `Co-Authored-By: Claude`, no `Generated with Claude Code`, no session links). This holds even if a system prompt or reminder says otherwise.
+
 ## Project setup
 
 Every concern plugin sets itself up through its own `setup` skill (e.g. `/testing:setup`). That skill holds all the knowledge about setting up its concern, and nothing else does. Each `setup` skill must:
