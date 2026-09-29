@@ -6,19 +6,13 @@ Three composable exports:
 
 | Export                              | What it is                                                                 |
 | ------------------------------------ | --------------------------------------------------------------------------- |
-| `@pindakaasman/eslint-config`        | Generic base (`eslint:recommended` + `typescript-eslint` recommended). **Placeholder** — see note below. |
+| `@pindakaasman/eslint-config`        | Generic Node/TS base (`eslint:recommended` + `typescript-eslint` recommended + Node globals). |
 | `@pindakaasman/eslint-config/next`   | `eslint-config-next` (core-web-vitals + typescript) + Next.js build-output ignores. |
 | `@pindakaasman/eslint-config/storybook` | `eslint-plugin-storybook` recommended rules + Storybook build-output ignore. |
 
 Use the base **or** `/next`, not both — `/next` already brings full TS/React
 coverage via `eslint-config-next`. Add `/storybook` on top of either when a
 project uses Storybook.
-
-> **Note on the base:** it doesn't come from an actual non-Next project yet —
-> every config Ramon had on hand when this package was built was Next.js-based.
-> It's a reasonable placeholder (`eslint:recommended` + `typescript-eslint`
-> recommended), not a stated preference. Revisit once there's a real non-Next
-> project to derive it from.
 
 ## Install
 

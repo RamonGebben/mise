@@ -1,12 +1,12 @@
-import * as os from "node:os";
-import * as path from "node:path";
+import * as os from 'node:os';
+import * as path from 'node:path';
 
-export const resolveMarketplaceSource = (argv: string[]): string => {
-  const flagIndex = argv.indexOf("--marketplace");
+export const resolveMarketplaceSource = (argv: Array<string>): string => {
+  const flagIndex = argv.indexOf('--marketplace');
   if (flagIndex !== -1) {
     const value = argv[flagIndex + 1];
     if (!value) {
-      throw new Error("--marketplace requires a value");
+      throw new Error('--marketplace requires a value');
     }
     return value;
   }
@@ -16,5 +16,5 @@ export const resolveMarketplaceSource = (argv: string[]): string => {
     return fromEnv;
   }
 
-  return path.join(os.homedir(), "Projects", "mise");
+  return path.join(os.homedir(), 'Projects', 'mise');
 };

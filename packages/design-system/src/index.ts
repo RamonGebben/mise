@@ -3,8 +3,6 @@ export { default } from './DesignSystem.js';
 export type {
   System,
   SystemTokens,
-  SystemOptions,
-  SystemOptionalKey,
   SystemFontSizes,
   SystemType,
   SystemBreakpoints,

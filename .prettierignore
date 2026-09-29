@@ -1,0 +1,8 @@
+# @pindakaasman/prettier-config only states JS/TS style preferences (quotes,
+# semicolons, trailing commas, …) - it has no opinion on JSON/YAML/Markdown,
+# so formatting only applies to source code, not prose docs or data files.
+*.md
+*.json
+*.yml
+*.yaml
+dist

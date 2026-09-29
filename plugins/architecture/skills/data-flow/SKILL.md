@@ -62,7 +62,7 @@ export const CosplanDetails = ({
   cosplan?: Cosplan;
   isLoading: boolean;
   error?: Error;
-}) {
+}) => {
   if (isLoading) return <Spinner />;
   if (error) return <ErrorState error={error} />;
   return <div>{cosplan.name}</div>;

@@ -21,6 +21,7 @@
   "files": ["index.js", "next.js", "storybook.js", "rules.js"],
   "dependencies": {
     "@eslint/js": "^9.9.0",
+    "globals": "^16.0.0",
     "typescript-eslint": "^8.0.0"
   },
   "peerDependencies": {

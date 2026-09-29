@@ -18,14 +18,6 @@ import type {
 import type { BaseColor, BaseColorVariant } from './colorPalette.js';
 import type { ColorString } from './types.js';
 
-export interface SystemOptions {
-  fontSizeUnit?: string | undefined;
-}
-
-export interface SystemOptionalKey {
-  [prop: string]: string | number;
-}
-
 /** A pixel value per size, as `'16px'` or `16`. */
 export type SystemFontSizes = Record<SystemSize, string | number>;
 
@@ -70,7 +62,6 @@ export interface SystemBorder {
 }
 
 export interface System {
-  [prop: string]: any;
   type: SystemType;
   breakpoints: SystemBreakpoints;
   colors: SystemColor;

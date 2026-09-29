@@ -46,7 +46,10 @@ The `init` plugin gets added once there are two or more concern plugins to combi
 
 ```
 .claude-plugin/marketplace.json    marketplace catalog, one entry per plugin
+.github/workflows/ci.yml           lint/format/build/test/validate on every push and PR
 .github/workflows/release.yml      changesets version/publish on push to main
+eslint.config.mjs                  this repo linted by its own @pindakaasman/eslint-config
+prettier.config.js                 this repo formatted by its own @pindakaasman/prettier-config
 scripts/sync-plugin-versions.js    copies plugin package.json version -> plugin.json
 plugins/<concern>/
   package.json                     private, version source of truth for Changesets
@@ -63,8 +66,21 @@ packages/
 
 ## Checks
 
-- Run `claude plugin validate .` after editing the marketplace or any plugin.
-- Test locally from another project: `claude plugin marketplace add <path-to-this-repo>`, then `claude plugin install <plugin>@mise`.
+This repo dogfoods its own `configs/` packages: `eslint.config.mjs` and
+`prettier.config.js` at the root pull in `@pindakaasman/eslint-config` and
+`@pindakaasman/prettier-config` as workspace deps, the same way any other
+project installing them would. Formatting only covers source code
+(`*.md`/`*.json`/`*.yml` are excluded via `.prettierignore` - the config
+package has no stated opinion on those). `.github/workflows/ci.yml` runs all
+of this on every push and PR:
+
+- `pnpm lint` / `pnpm format` - this repo's own code against its own configs.
+- `pnpm build` / `pnpm test` - compiles and tests every package.
+- `pnpm validate-plugins` (`claude plugin validate .`) - after editing the
+  marketplace or any plugin, run this locally too rather than waiting for CI.
+
+Test locally from another project: `claude plugin marketplace add
+<path-to-this-repo>`, then `claude plugin install <plugin>@mise`.
 
 ## Release automation
 
