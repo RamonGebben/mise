@@ -2,9 +2,14 @@
   "name": "@pindakaasman/design-system",
   "version": "0.3.0",
   "type": "module",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
-  "author": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
+  "author": {
+    "name": "Ramon Gebben",
+    "url": "https://github.com/RamonGebben"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RamonGebben/mise.git",
@@ -20,10 +25,13 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
     "ramda": "^0.30.0",

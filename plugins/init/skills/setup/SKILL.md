@@ -13,12 +13,14 @@ concern, change that concern's own setup skill, not this one.
 ## Steps
 
 Walk these concern plugins **in this order** - TypeScript conventions before
-component patterns that assume them, architecture before what plugs into it:
+component patterns that assume them, architecture before what plugs into it,
+and verification last since it wires up the tools the others installed:
 
 1. `typescript`
 2. `architecture`
 3. `react`
 4. `testing`
+5. `verification`
 
 For each plugin in the list:
 
@@ -108,7 +110,7 @@ list --json`, find the entry named `mise`, read its `installLocation`.
 
    Formatting rules, exactly:
    - Plugins appear in the walk order from the Steps section above
-     (`typescript`, `architecture`, `react`, `testing`), skills within each
+     (`typescript`, `architecture`, `react`, `testing`, `verification`), skills within each
      plugin sorted alphabetically by skill name.
    - No blank line between one plugin's bullet group and the next - the
      block is one continuous list, plugin bullets and skill sub-bullets

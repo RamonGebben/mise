@@ -30,6 +30,7 @@ per concern, distributed through the marketplace.
 | `typescript`   | TypeScript language conventions - type declarations, enums, narrowing      |
 | `react`        | React-specific component patterns and judgment calls                       |
 | `testing`      | How I test: harness, structure and what to test                            |
+| `verification` | When to run which checks, the pre-commit gate, handling failing checks     |
 | `init`         | Combines each installed plugin's setup skill into one plan-then-apply flow |
 
 ```bash
