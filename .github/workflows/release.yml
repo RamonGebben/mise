@@ -1,9 +1,11 @@
 name: Release
 
+# Only release once CI (lint, format, typecheck, build, test) has passed on main.
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -15,6 +17,7 @@ env:
 jobs:
   release:
     name: Release
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
     permissions:
       contents: write
