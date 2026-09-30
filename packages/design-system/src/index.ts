@@ -1,4 +1,5 @@
 export { default } from './DesignSystem.js';
+export type { DesignSystemOptions } from './DesignSystem.js';
 
 export type {
   System,

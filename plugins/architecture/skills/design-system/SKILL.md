@@ -68,6 +68,16 @@ Full placeholder starting point: [templates/theme/index.ts](templates/theme/inde
 Structure is real, the colors/numbers are not - replace them with your
 actual brand values.
 
+**Rendering without a viewport.** `fontSize()`, `spacing()` and
+`spacingBetween()` resolve per breakpoint, which needs a viewport. During
+SSR there isn't one, so they fall back to the largest breakpoint. A
+mobile-first app can switch that to the smallest by passing an option -
+leave the default unless the project asks for it:
+
+```ts
+const theme = new DesignSystem(tokens, { ssrBreakpoint: 'smallest' });
+```
+
 > **Roadmap note:** when the published package's `SystemTokens` shape
 > changes across a version bump, each project's scaffolded tokens file needs
 > a matching migration. The plan is to have setup/migration tooling do this
