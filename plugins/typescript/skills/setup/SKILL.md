@@ -77,14 +77,24 @@ code wasn't failing anything before the config arrived.
 - **Lint-enforced rules.** If `@pindakaasman/eslint-config` is already
   wired up, run `eslint .` and use its output. If not, scan the source for
   what the config will report once installed - the stated rules in
-  `configs/eslint/rules.js` (read it fresh; it's the list, not this skill)
-  plus anything obvious from `eslint:recommended`/`typescript-eslint`'s
-  recommended set. Auto-fixable violations (e.g. `Array<T>`, arrow
-  callbacks) go in the plan as one `eslint --fix` pass. The rest each get a
-  proposed rewrite: `any` narrowed from `unknown` at the boundary, `enum`
-  replaced by a union of string literals (and its usages updated),
-  `function` declarations rewritten as arrow `const`s - except a function
-  that genuinely needs its own `this`, which stays a `function` expression.
+  `configs/eslint/rules.js` in the mise repo (read it fresh; it's the list,
+  not this skill) plus anything obvious from the base set the detected
+  flavor's export extends (`eslint:recommended`/`typescript-eslint`'s
+  recommended for the base export; `eslint-config-next`'s
+  `core-web-vitals` and `typescript` sets for `/next`). Auto-fixable
+  violations (e.g. `Array<T>`, arrow callbacks) go in the plan as one
+  `eslint --fix` pass. The rest each get a proposed rewrite: `any` narrowed
+  from `unknown` at the boundary, `enum` replaced by a union of string
+  literals (and its usages updated), `function` declarations rewritten as
+  arrow `const`s - except a function that genuinely needs its own `this`,
+  which stays a `function` expression. A `function` declaration is hoisted
+  and a `const` isn't: if it's called before its definition runs (e.g.
+  module-level code or another `const` initializer above it using it),
+  move the `const` above that first use in the same rewrite, or the
+  migration throws a `ReferenceError` at load time. A generator
+  (`function*`) or a function with TypeScript overload signatures can't be
+  an arrow - rewrite it as a `const` holding a `function` expression (with
+  an overloaded call-signature type for the latter) instead.
   When the right narrowing for an `any` isn't clear from the surrounding
   code, list it as needing a human call rather than guessing a type.
 - **Judgment rules** from [[conventions]] that no lint rule checks:

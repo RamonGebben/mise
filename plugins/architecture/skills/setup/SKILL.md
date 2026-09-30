@@ -115,7 +115,7 @@ plan, with the proposed fix. Apply only what's approved.
 - An atom/store used by only one component tree but living in a global
   folder → propose moving it into that component's `state/` folder. One
   genuinely shared app-wide but living inside a component → propose
-  `src/store/` (or `src/atoms/` for Jotai).
+  `src/store/` (or `src/state/` for Jotai).
 - Jotai vs Zustand is explicitly a judgment call, not a rule - don't flag an
   existing Zustand store just for being Zustand.
 
