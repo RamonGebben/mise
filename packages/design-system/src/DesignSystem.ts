@@ -14,8 +14,25 @@ import type { SystemTokens } from './system.js';
 import { path } from 'ramda';
 import type { ColorString } from './types.js';
 
+/**
+ * Whether there's a viewport to measure. False wherever there's no DOM -
+ * server rendering, workers, plain Node - so breakpoint-aware accessors can
+ * fall back instead of throwing.
+ */
+const canMatchMedia = (): boolean =>
+  typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+
+export type DesignSystemOptions = {
+  /**
+   * Which breakpoint to resolve to when there's no viewport to measure
+   * (e.g. during SSR). Mobile-first apps usually want `'smallest'`.
+   */
+  ssrBreakpoint?: 'smallest' | 'largest';
+};
+
 export default class DesignSystem {
   private ds: SystemTokens;
+  private ssrBreakpoint: NonNullable<DesignSystemOptions['ssrBreakpoint']>;
 
   /**
    * mq()
@@ -23,8 +40,9 @@ export default class DesignSystem {
    */
   public mq: MediaGenerator<SystemBreakpointMap, DesignSystem>;
 
-  constructor(tokens: SystemTokens) {
+  constructor(tokens: SystemTokens, options: DesignSystemOptions = {}) {
     this.ds = tokens;
+    this.ssrBreakpoint = options.ssrBreakpoint ?? 'largest';
     this.mq = generateMedia(this.ds.breakpoints);
   }
 
@@ -175,17 +193,23 @@ export default class DesignSystem {
 
   /**
    * getCurrentBreakpoint()
-   * returns the closest matching breakpoint based on viewport size
+   * returns the closest matching breakpoint based on viewport size, or the
+   * `ssrBreakpoint` option when there is no viewport to measure (e.g. during SSR)
    */
   public getCurrentBreakpoint(): SystemBreakpoint {
     const breakpoints = this.ds.breakpoints;
     const keys = Object.keys(breakpoints) as Array<SystemBreakpoint>;
+    const largest = keys[keys.length - 1];
+
+    if (!canMatchMedia()) {
+      return this.ssrBreakpoint === 'smallest' ? keys[0] : largest;
+    }
 
     const currentBp = keys.filter(
       key => window.matchMedia(`(max-width: ${breakpoints[key]})`).matches,
     );
 
-    return currentBp[0] || keys[keys.length - 1];
+    return currentBp[0] || largest;
   }
 
   /**

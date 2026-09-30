@@ -162,6 +162,35 @@ describe('DesignSystem', () => {
       setViewportWidth(1920);
       expect(theme.getCurrentBreakpoint()).toBe('desktop');
     });
+
+    it('falls back to the last breakpoint by default when there is no window (SSR)', () => {
+      vi.stubGlobal('window', undefined);
+      expect(theme.getCurrentBreakpoint()).toBe('desktop');
+      expect(theme.fontSize('l')).toBe('2rem');
+      expect(theme.spacing('base')).toBe('2rem');
+    });
+
+    it('falls back to the last breakpoint when window has no matchMedia', () => {
+      vi.stubGlobal('window', {});
+      expect(theme.getCurrentBreakpoint()).toBe('desktop');
+    });
+
+    it('falls back to the first breakpoint without a window when ssrBreakpoint is smallest', () => {
+      vi.stubGlobal('window', undefined);
+      const mobileFirst = new DesignSystem(tokens, {
+        ssrBreakpoint: 'smallest',
+      });
+      expect(mobileFirst.getCurrentBreakpoint()).toBe('mobile');
+      expect(mobileFirst.fontSize('l')).toBe('1.25rem');
+    });
+
+    it('ignores ssrBreakpoint when there is a viewport', () => {
+      setViewportWidth(1920);
+      const mobileFirst = new DesignSystem(tokens, {
+        ssrBreakpoint: 'smallest',
+      });
+      expect(mobileFirst.getCurrentBreakpoint()).toBe('desktop');
+    });
   });
 
   describe('fontSize / fs', () => {

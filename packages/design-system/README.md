@@ -37,6 +37,16 @@ const theme = new DesignSystem(tokens);
 export default theme;
 ```
 
+### Rendering without a viewport
+
+`fontSize()`, `spacing()` and `spacingBetween()` resolve per breakpoint, which
+needs a viewport. Where there isn't one (server rendering, plain Node) they
+use the largest breakpoint. A mobile-first app can pick the smallest instead:
+
+```ts
+const theme = new DesignSystem(tokens, { ssrBreakpoint: 'smallest' });
+```
+
 ## Accessing tokens
 
 Every token goes through a typed method - never a hard-coded value, and
@@ -70,7 +80,7 @@ const Card = styled.div`
 | `bp(breakpoint)`                              | `breakpoint: SystemBreakpoint`                         | `string`           | Raw breakpoint value.                                                                                                                                                |
 | `z(z)`                                        | `z: SystemZIndex`                                      | `number`           | Z-index value.                                                                                                                                                       |
 | `mq`                                          | -                                                      | `MediaGenerator`   | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.greaterThan('tabletLandscape')`...` `` (also `lessThan`, `between`). |
-| `getCurrentBreakpoint()`                      | -                                                      | `SystemBreakpoint` | Closest matching breakpoint for the current viewport.                                                                                                                |
+| `getCurrentBreakpoint()`                      | -                                                      | `SystemBreakpoint` | Closest matching breakpoint for the current viewport; the `ssrBreakpoint` option when there's no viewport (SSR, Node).                                               |
 | `getTokens()`                                 | -                                                      | `SystemTokens`     | The raw tokens object passed to the constructor.                                                                                                                     |
 | `remToPx(value)`                              | `value: number \| string`                              | `string` (px)      | Convert rem to px, with unit.                                                                                                                                        |
 | `remToPxRaw(value)`                           | `value: number \| string`                              | `number`           | Convert rem to px, number only.                                                                                                                                      |
