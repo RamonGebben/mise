@@ -2,9 +2,14 @@
   "name": "@pindakaasman/eslint-config",
   "version": "0.3.0",
   "type": "module",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
-  "author": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
+  "author": {
+    "name": "Ramon Gebben",
+    "url": "https://github.com/RamonGebben"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RamonGebben/mise.git",
@@ -18,7 +23,12 @@
     "./next": "./next.js",
     "./storybook": "./storybook.js"
   },
-  "files": ["index.js", "next.js", "storybook.js", "rules.js"],
+  "files": [
+    "index.js",
+    "next.js",
+    "storybook.js",
+    "rules.js"
+  ],
   "dependencies": {
     "@eslint/js": "^9.9.0",
     "globals": "^16.0.0",
@@ -30,7 +40,11 @@
     "eslint-plugin-storybook": "*"
   },
   "peerDependenciesMeta": {
-    "eslint-config-next": { "optional": true },
-    "eslint-plugin-storybook": { "optional": true }
+    "eslint-config-next": {
+      "optional": true
+    },
+    "eslint-plugin-storybook": {
+      "optional": true
+    }
   }
 }

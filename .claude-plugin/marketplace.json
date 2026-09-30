@@ -27,6 +27,11 @@
       "name": "typescript",
       "source": "./plugins/typescript",
       "description": "TypeScript language conventions - type declarations, enums, narrowing"
+    },
+    {
+      "name": "verification",
+      "source": "./plugins/verification",
+      "description": "How and when to verify a change: pre-commit hook, what to run while developing, what to do when a check fails"
     }
   ]
 }

@@ -39,12 +39,18 @@ jobs:
       - name: Update npm
         run: npm install -g npm@latest
 
+      # The version commit below goes through the husky pre-commit hook, which
+      # runs `claude plugin validate .` when plugin/marketplace files are staged
+      # (every version bump syncs plugin.json).
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
       - name: Create release pull request or publish
         uses: changesets/action@v1
         with:
           version: pnpm run version
           publish: pnpm run release
-          commit: "chore: version packages"
-          title: "chore: version packages"
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

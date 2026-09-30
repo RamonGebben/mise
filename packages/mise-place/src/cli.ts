@@ -4,7 +4,14 @@ import { resolveMarketplaceSource } from './resolve-marketplace.js';
 import { runCaptured, runInherited } from './run-command.js';
 
 const MARKETPLACE_NAME = 'mise';
-const PLUGINS = ['typescript', 'architecture', 'react', 'testing', 'init'];
+const PLUGINS = [
+  'typescript',
+  'architecture',
+  'react',
+  'testing',
+  'verification',
+  'init',
+];
 const RECIPE_PROMPT = '/init:setup';
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {

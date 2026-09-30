@@ -46,9 +46,11 @@ The `init` plugin gets added once there are two or more concern plugins to combi
 
 ```
 .claude-plugin/marketplace.json    marketplace catalog, one entry per plugin
-.github/workflows/ci.yml           lint/format/build/test/validate on every push and PR
+.github/workflows/ci.yml           lint/format/typecheck/build/test/validate on every push and PR
 .github/workflows/release.yml      changesets version/publish on push to main
+.husky/pre-commit                  pre-commit gate (see Checks)
 eslint.config.mjs                  this repo linted by its own @pindakaasman/eslint-config
+lint-staged.config.js              what the pre-commit hook runs on staged files
 prettier.config.js                 this repo formatted by its own @pindakaasman/prettier-config
 scripts/sync-plugin-versions.js    copies plugin package.json version -> plugin.json
 plugins/<concern>/
@@ -66,18 +68,24 @@ packages/
 
 ## Checks
 
-This repo dogfoods its own `configs/` packages: `eslint.config.mjs` and
+This repo dogfoods its own `configs/` packages and plugins - the same rules
+and principles it ships apply here too. `eslint.config.mjs` and
 `prettier.config.js` at the root pull in `@pindakaasman/eslint-config` and
 `@pindakaasman/prettier-config` as workspace deps, the same way any other
-project installing them would. Formatting only covers source code
-(`*.md`/`*.json`/`*.yml` are excluded via `.prettierignore` - the config
-package has no stated opinion on those). `.github/workflows/ci.yml` runs all
-of this on every push and PR:
+project installing them would. Prettier formats every file type it can parse;
+only generated files are in `.prettierignore`.
+
+Verification follows the `verification` plugin's own conventions: the husky
+pre-commit hook (`.husky/pre-commit`, `lint-staged.config.js`) formats and
+lints staged files, validates plugins when plugin/marketplace files are
+staged, then runs `pnpm typecheck` and the full `pnpm test` - all against
+the staged snapshot only (`--hide-all`). Never bypass it.
+`.github/workflows/ci.yml` runs the same checks on every push and PR:
 
 - `pnpm lint` / `pnpm format` - this repo's own code against its own configs.
-- `pnpm build` / `pnpm test` - compiles and tests every package.
-- `pnpm validate-plugins` (`claude plugin validate .`) - after editing the
-  marketplace or any plugin, run this locally too rather than waiting for CI.
+- `pnpm typecheck` / `pnpm build` / `pnpm test` - type-checks, compiles and
+  tests every package.
+- `pnpm validate-plugins` (`claude plugin validate .`).
 
 Test locally from another project: `claude plugin marketplace add
 <path-to-this-repo>`, then `claude plugin install <plugin>@mise`.

@@ -1,13 +1,6 @@
-# @pindakaasman/prettier-config only states JS/TS style preferences (quotes,
-# semicolons, trailing commas, …) - it has no opinion on JSON/YAML, so those
-# stay unformatted. Markdown IS formatted (proseWrap defaults to 'preserve',
-# so prose line breaks are untouched) - the point is the fenced code blocks
-# our skills document, which should follow the same style they teach.
-*.json
-*.yml
-*.yaml
 dist
 
-# Generated/transient, not hand-authored docs with examples to keep styled.
+# Generated, not hand-authored.
 CHANGELOG.md
 .changeset/*.md
+pnpm-lock.yaml

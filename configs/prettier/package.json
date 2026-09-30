@@ -2,9 +2,14 @@
   "name": "@pindakaasman/prettier-config",
   "version": "0.1.2",
   "type": "module",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
-  "author": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
+  "author": {
+    "name": "Ramon Gebben",
+    "url": "https://github.com/RamonGebben"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RamonGebben/mise.git",
@@ -14,7 +19,9 @@
   "homepage": "https://github.com/RamonGebben/mise/tree/main/configs/prettier#readme",
   "main": "./index.js",
   "exports": "./index.js",
-  "files": ["index.js"],
+  "files": [
+    "index.js"
+  ],
   "peerDependencies": {
     "prettier": "^3.0.0"
   }
