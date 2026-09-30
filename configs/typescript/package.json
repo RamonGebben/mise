@@ -1,9 +1,14 @@
 {
   "name": "@pindakaasman/tsconfig",
   "version": "0.2.1",
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "MIT",
-  "author": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
+  "author": {
+    "name": "Ramon Gebben",
+    "url": "https://github.com/RamonGebben"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/RamonGebben/mise.git",
@@ -11,7 +16,12 @@
   },
   "bugs": "https://github.com/RamonGebben/mise/issues",
   "homepage": "https://github.com/RamonGebben/mise/tree/main/configs/typescript#readme",
-  "files": ["base.json", "app.json", "library.json", "nextjs.json"],
+  "files": [
+    "base.json",
+    "app.json",
+    "library.json",
+    "nextjs.json"
+  ],
   "exports": {
     "./base.json": "./base.json",
     "./app.json": "./app.json",
