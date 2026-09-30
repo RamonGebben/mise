@@ -7,6 +7,11 @@ on:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
+# Git hooks already ran locally and CI runs the same checks, so skip husky here
+# (the changesets version commit would otherwise trigger pre-commit).
+env:
+  HUSKY: 0
+
 jobs:
   release:
     name: Release
@@ -38,12 +43,6 @@ jobs:
       # npm can lag behind this.
       - name: Update npm
         run: npm install -g npm@latest
-
-      # The version commit below goes through the husky pre-commit hook, which
-      # runs `claude plugin validate .` when plugin/marketplace files are staged
-      # (every version bump syncs plugin.json).
-      - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code
 
       - name: Create release pull request or publish
         uses: changesets/action@v1
