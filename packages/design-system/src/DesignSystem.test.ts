@@ -15,18 +15,82 @@ const tokens: SystemTokens = {
     fontWeight: { regular: 400, medium: 500, semibold: 600, bold: 700 },
     lineHeight: { tight: 1.1, base: 1.5, loose: 1.8 },
     sizes: {
-      mobile: { xxs: '8px', xs: '10px', s: '12px', base: '14px', m: '16px', l: '20px', xl: 24 },
-      tablet: { xxs: '9px', xs: '11px', s: '13px', base: '15px', m: '18px', l: '24px', xl: 28 },
-      tabletLandscape: { xxs: '10px', xs: '12px', s: '14px', base: '16px', m: '20px', l: '28px', xl: 32 },
-      desktop: { xxs: '10px', xs: '12px', s: '14px', base: '16px', m: '24px', l: '32px', xl: 40 },
+      mobile: {
+        xxs: '8px',
+        xs: '10px',
+        s: '12px',
+        base: '14px',
+        m: '16px',
+        l: '20px',
+        xl: 24,
+      },
+      tablet: {
+        xxs: '9px',
+        xs: '11px',
+        s: '13px',
+        base: '15px',
+        m: '18px',
+        l: '24px',
+        xl: 28,
+      },
+      tabletLandscape: {
+        xxs: '10px',
+        xs: '12px',
+        s: '14px',
+        base: '16px',
+        m: '20px',
+        l: '28px',
+        xl: 32,
+      },
+      desktop: {
+        xxs: '10px',
+        xs: '12px',
+        s: '14px',
+        base: '16px',
+        m: '24px',
+        l: '32px',
+        xl: 40,
+      },
     },
   },
   spacing: {
     scale: {
-      mobile: { xxs: '2px', xs: '4px', s: '8px', base: '16px', m: '20px', l: '24px', xl: 32 },
-      tablet: { xxs: '2px', xs: '4px', s: '8px', base: '20px', m: '24px', l: '32px', xl: 40 },
-      tabletLandscape: { xxs: '4px', xs: '8px', s: '12px', base: '24px', m: '32px', l: '40px', xl: 48 },
-      desktop: { xxs: '4px', xs: '8px', s: '16px', base: '32px', m: '40px', l: '48px', xl: 64 },
+      mobile: {
+        xxs: '2px',
+        xs: '4px',
+        s: '8px',
+        base: '16px',
+        m: '20px',
+        l: '24px',
+        xl: 32,
+      },
+      tablet: {
+        xxs: '2px',
+        xs: '4px',
+        s: '8px',
+        base: '20px',
+        m: '24px',
+        l: '32px',
+        xl: 40,
+      },
+      tabletLandscape: {
+        xxs: '4px',
+        xs: '8px',
+        s: '12px',
+        base: '24px',
+        m: '32px',
+        l: '40px',
+        xl: 48,
+      },
+      desktop: {
+        xxs: '4px',
+        xs: '8px',
+        s: '16px',
+        base: '32px',
+        m: '40px',
+        l: '48px',
+        xl: 64,
+      },
     },
   },
   colors: {
@@ -281,7 +345,9 @@ describe('DesignSystem', () => {
     it('between wraps styles in a min- and max-width query', () => {
       expect(
         cssText(theme.mq.between('tablet', 'tabletLandscape')`color: red;`),
-      ).toBe('@media (min-width: 768px) and (max-width: 1024px) { color: red; }');
+      ).toBe(
+        '@media (min-width: 768px) and (max-width: 1024px) { color: red; }',
+      );
     });
   });
 });

@@ -60,7 +60,7 @@ changed):
 - The `npm install --save-dev ...` command (or the project's actual package
   manager - detect from the lockfile present: `pnpm-lock.yaml` →
   `pnpm add -D`, `yarn.lock` → `yarn add -D`, otherwise `npm install
-  --save-dev`).
+--save-dev`).
 - The exact file content for `tsconfig.json` / `eslint.config.mjs` /
   the prettier field, adapted to the detected flavor. Preserve anything
   project-specific already in these files (e.g. `paths`, `include`,

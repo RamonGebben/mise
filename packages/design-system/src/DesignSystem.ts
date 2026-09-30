@@ -182,8 +182,7 @@ export default class DesignSystem {
     const keys = Object.keys(breakpoints) as Array<SystemBreakpoint>;
 
     const currentBp = keys.filter(
-      key =>
-        window.matchMedia(`(max-width: ${breakpoints[key]})`).matches,
+      key => window.matchMedia(`(max-width: ${breakpoints[key]})`).matches,
     );
 
     return currentBp[0] || keys[keys.length - 1];
@@ -214,7 +213,7 @@ export default class DesignSystem {
     return parseFloat(this.remToPx(value));
   }
 
-  public get(pathToProperty: string) {
-    return path(pathToProperty.split('.'), this.ds) as any;
+  public get(pathToProperty: string): unknown {
+    return path(pathToProperty.split('.'), this.ds);
   }
 }

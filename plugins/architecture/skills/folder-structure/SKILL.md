@@ -52,7 +52,7 @@ export const Dashboard = ({ data }: { data: DashboardData }) => {
 
 ## `src/providers/`
 
-For app-level providers/managers that sit *outside* the atomic hierarchy -
+For app-level providers/managers that sit _outside_ the atomic hierarchy -
 client wrappers that wire cross-cutting concerns into the tree, rather than
 render feature UI (e.g. `InstallPromptManager`, `ServiceWorkerRegistrar`,
 `MarketingUserMenu`). Presentational UI belongs in `atoms`/`molecules`/`organisms`;
@@ -129,7 +129,10 @@ export const getRemainingMs = (target: Date, now: Date) => {
 export const useCountdown = (target: Date) => {
   const [remaining, setRemaining] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setRemaining(getRemainingMs(target, new Date())), 1000);
+    const id = setInterval(
+      () => setRemaining(getRemainingMs(target, new Date())),
+      1000,
+    );
     return () => clearInterval(id);
   }, [target]);
   return remaining;

@@ -1,18 +1,28 @@
 {
   "name": "mise",
   "private": true,
+  "type": "module",
   "license": "MIT",
   "author": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
   "repository": { "type": "git", "url": "git+https://github.com/RamonGebben/mise.git" },
   "packageManager": "pnpm@10.34.6",
   "scripts": {
     "build": "pnpm -r --if-present run build",
+    "test": "pnpm -r --if-present run test",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "validate-plugins": "claude plugin validate .",
     "changeset": "changeset",
     "sync-plugin-versions": "node scripts/sync-plugin-versions.js",
     "version": "changeset version && pnpm sync-plugin-versions",
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^3.0.3"
+    "@changesets/cli": "^3.0.3",
+    "@pindakaasman/eslint-config": "workspace:*",
+    "@pindakaasman/prettier-config": "workspace:*",
+    "eslint": "^9.9.0",
+    "prettier": "^3.0.0"
   }
 }

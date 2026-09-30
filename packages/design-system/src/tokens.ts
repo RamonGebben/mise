@@ -3,7 +3,8 @@
 // new version of this package (that's the point: consistent tokens across
 // every project that depends on it).
 
-export type SystemBreakpoint = 'mobile' | 'tablet' | 'tabletLandscape' | 'desktop';
+export type SystemBreakpoint =
+  'mobile' | 'tablet' | 'tabletLandscape' | 'desktop';
 
 export type SystemBreakpointMap = Record<SystemBreakpoint, string>;
 
