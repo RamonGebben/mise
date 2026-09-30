@@ -138,4 +138,11 @@ after approval. Then run `format`, `lint`, `typecheck` and `test` once
 failures surface now; report them per [[conventions]]'s "pre-existing
 failure" steps rather than fixing them as part of setup.
 
+Lint or type errors that only exist because the project just adopted mise's
+configs aren't pre-existing failures - they're migration, and
+`typescript:setup` (which runs first) already planned and applied their
+fixes. If any still show up here, that step missed them: report them as
+unfinished migration and hand them back to `typescript:setup`, not to the
+pre-existing failure flow.
+
 Re-running on a project that already complies must produce an empty plan.

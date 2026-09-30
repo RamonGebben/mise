@@ -33,6 +33,7 @@ Every concern plugin sets itself up through its own `setup` skill (e.g. `/testin
 
 - **Plan, then apply.** Report the changes it would make (installs, files moved or created, refactors) without touching anything, and only apply them once approved.
 - **Be safe to re-run.** On a project that already complies, it changes nothing. The same skill handles a blank starter, migrating an existing project, and pulling in updated conventions.
+- **Cover every rule in its plugin.** Migrating an existing project means auditing its code against every rule in every skill of that plugin, not just installing tools. Adding or changing a rule in a skill means updating that plugin's setup audit in the same change - otherwise existing projects never get checked against it.
 
 Recipes live in the `init` plugin (e.g. `/init:nextjs`). A recipe is only an ordered list of setup steps, with no setup knowledge of its own. It:
 
