@@ -1,6 +1,6 @@
 {
   "name": "verification",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "How and when to verify a change: pre-commit hook, what to run while developing, what to do when a check fails",
   "author": { "name": "Ramon Gebben" }
 }

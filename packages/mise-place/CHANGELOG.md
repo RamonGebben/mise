@@ -1,5 +1,11 @@
 # @pindakaasman/mise-place
 
+## 0.2.0
+
+### Minor Changes
+
+- c2fd16d: Add the `verification` plugin: when to run which checks (related tests while developing, the full pre-commit gate before every commit, e2e/Storybook when a change touches them) and how to handle a failing check, plus a `setup` skill that installs husky + lint-staged and the standard `format`/`lint`/`typecheck`/`test` scripts. `init:setup` runs it last, and `mise-place` installs it.
+
 ## 0.1.2
 
 ### Patch Changes
