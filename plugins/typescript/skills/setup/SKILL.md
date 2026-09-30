@@ -1,15 +1,15 @@
 ---
 name: setup
-description: Install and wire up @pindakaasman/tsconfig, @pindakaasman/eslint-config and @pindakaasman/prettier-config in the current project
+description: Install and wire up @pindakaasman/tsconfig, @pindakaasman/eslint-config and @pindakaasman/prettier-config in the current project, and migrate existing code onto the TypeScript conventions
 ---
 
 # typescript:setup
 
-Sets up the mechanical half of the `typescript` plugin's conventions: the
-shared TypeScript, ESLint and Prettier config packages that
+Sets up the shared TypeScript, ESLint and Prettier config packages that
 [[conventions]]'s lint-enforced rules (`Array<T>`, no `any`, no `enum`) ride
-on. Nothing here is a judgment call - it's the install/usage steps from each
-package's own README, applied to whatever's already in the project.
+on - the install/usage steps from each package's own README, applied to
+whatever's already in the project - then migrates existing code onto every
+rule in [[conventions]], lint-enforced or not.
 
 Follows the repo-wide contract in the mise `CLAUDE.md`'s "Project setup"
 section: plan, then apply only after approval; safe to re-run on a project
@@ -67,11 +67,52 @@ changed):
   `globalIgnores` entries, an overridden Prettier rule) rather than
   clobbering it - only change what points at the old/missing config.
 
-Present the combined plan (all three, or just what's missing/migrating) and
-apply only after approval.
+## 4. Migrate existing code
 
-## 4. Apply
+Wiring up the configs is only half of it - existing code has to comply too.
+Violations the newly adopted ESLint config reports are part of this
+migration, not "pre-existing failures" in the `verification` plugin's sense: the
+code wasn't failing anything before the config arrived.
 
-Run the installs, then write the files exactly as planned. Re-running this
-skill afterward must detect everything as already wired up and produce an
-empty plan.
+- **Lint-enforced rules.** If `@pindakaasman/eslint-config` is already
+  wired up, run `eslint .` and use its output. If not, scan the source for
+  what the config will report once installed - the stated rules in
+  `configs/eslint/rules.js` in the mise repo (read it fresh; it's the list,
+  not this skill) plus anything obvious from the base set the detected
+  flavor's export extends (`eslint:recommended`/`typescript-eslint`'s
+  recommended for the base export; `eslint-config-next`'s
+  `core-web-vitals` and `typescript` sets for `/next`). Auto-fixable
+  violations (e.g. `Array<T>`, arrow callbacks) go in the plan as one
+  `eslint --fix` pass. The rest each get a proposed rewrite: `any` narrowed
+  from `unknown` at the boundary, `enum` replaced by a union of string
+  literals (and its usages updated), `function` declarations rewritten as
+  arrow `const`s - except a function that genuinely needs its own `this`,
+  which stays a `function` expression. A `function` declaration is hoisted
+  and a `const` isn't: if it's called before its definition runs (e.g.
+  module-level code or another `const` initializer above it using it),
+  move the `const` above that first use in the same rewrite, or the
+  migration throws a `ReferenceError` at load time. A generator
+  (`function*`) or a function with TypeScript overload signatures can't be
+  an arrow - rewrite it as a `const` holding a `function` expression (with
+  an overloaded call-signature type for the latter) instead.
+  When the right narrowing for an `any` isn't clear from the surrounding
+  code, list it as needing a human call rather than guessing a type.
+- **Judgment rules** from [[conventions]] that no lint rule checks:
+  - A `type` alias declaring a plain object shape → propose an `interface`.
+    Leave unions, tuples, mapped/utility types and intersections as `type`.
+  - A const config object with a type annotation whose literal values are
+    read downstream (e.g. a tokens object, a router map) → propose
+    `satisfies` instead. Don't flag annotations where nothing depends on the
+    narrowed type.
+
+## 5. Apply
+
+Present the combined plan (config installs/migrations from step 3, code
+migrations from step 4) and apply only after approval. Run the installs,
+write the config files, then apply the code migrations. Afterward, run
+`eslint .` and `tsc --noEmit` (or `tsc -b --noEmit` for a solution-style
+root tsconfig): anything still failing goes back to the user as a list,
+not silently left for the pre-commit hook to trip over.
+
+Re-running this skill afterward must detect everything as already wired up
+and compliant, and produce an empty plan.

@@ -40,7 +40,7 @@ where it's used, not dumped in one folder by default:
   ```
 
 - **Global** - state genuinely shared app-wide lives in `src/store/` (or
-  `src/atoms/` for Jotai) at the top level, parallel to `src/theme/` -
+  `src/state/` for Jotai) at the top level, parallel to `src/theme/` -
   outside the atomic hierarchy, same reasoning as [[design-system]]'s theme
   folder: it's a cross-cutting concern, not owned by any one component.
 
