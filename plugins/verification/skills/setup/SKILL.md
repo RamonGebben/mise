@@ -37,7 +37,7 @@ rely on them without reading `package.json` first:
 | `format`         | `prettier --check .`           | Prettier installed          |
 | `format:write`   | `prettier --write .`           | Prettier installed          |
 | `lint`           | `eslint .`                     | ESLint installed            |
-| `typecheck`      | `tsc --noEmit`                 | TypeScript installed        |
+| `typecheck`      | `tsc --noEmit` \*\*            | TypeScript installed        |
 | `test`           | `vitest run`                   | Vitest installed            |
 | `test:e2e`       | `playwright test`              | Playwright installed        |
 | `test:storybook` | the runner Storybook set up \* | Storybook tests configured  |
@@ -46,6 +46,10 @@ rely on them without reading `package.json` first:
 \* `vitest --project=storybook --run` with Storybook's Vitest addon, or
 `test-storybook` with the older test runner - use whichever the Storybook
 install actually configured.
+
+\*\* If the root `tsconfig.json` is a solution file (`"files": []` plus
+`references`, as Vite's templates set up), plain `tsc --noEmit` checks
+nothing and always passes - use `tsc -b --noEmit` instead.
 
 In a monorepo, the root scripts fan out to packages
 (`pnpm -r --if-present run typecheck`, etc.) and each package with its own
@@ -74,7 +78,9 @@ were previously ignored - make that a **separate commit** in the plan
 Install `husky` and `lint-staged` as devDependencies, then:
 
 `lint-staged.config.mjs` (a JS file, not a `package.json` key - the
-whole-project checks need function tasks, which JSON can't express):
+whole-project checks need function tasks, which JSON can't express). The
+example uses pnpm; swap `pnpm run` for the detected package manager's
+equivalent (`npm run`, `yarn`):
 
 ```js
 export default {
