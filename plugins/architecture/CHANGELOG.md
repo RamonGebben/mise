@@ -1,5 +1,11 @@
 # @pindakaasman/architecture-plugin
 
+## 0.7.2
+
+### Patch Changes
+
+- 13a1167: `design-system` skill: document the `ssrBreakpoint` option for choosing which breakpoint tokens resolve to during SSR.
+
 ## 0.7.1
 
 ### Patch Changes
