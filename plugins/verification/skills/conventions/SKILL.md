@@ -36,6 +36,10 @@ The pre-commit hook runs, in order:
 3. `typecheck` on the whole project.
 4. `test` - the **full** Vitest suite.
 
+Unstaged changes and untracked files are hidden while it runs, so it checks
+exactly what the commit will contain. Stage everything the change needs -
+a new file you forgot to `git add` fails the hook even though it's on disk.
+
 Don't run these by hand first just to "check" - commit, and let the hook do
 it. If the hook fails, the commit didn't happen: fix the cause and commit
 again.

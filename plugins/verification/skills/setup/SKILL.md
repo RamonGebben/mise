@@ -61,7 +61,9 @@ project-specific script under another name is left alone.
 Prettier formats every file it can parse, not just JS/TS. If
 `.prettierignore` excludes whole file types (`*.json`, `*.yml`, `*.md`),
 propose removing those lines. Keep ignores for generated files
-(`dist/`, `CHANGELOG.md`, lockfiles - Prettier skips lockfiles by default).
+(`dist/`, `CHANGELOG.md`), and make sure `pnpm-lock.yaml` is ignored -
+Prettier does **not** skip lockfiles, and reformatting the one pnpm
+writes fails `format` and churns on every install.
 
 The first run of `format:write` after this will likely reformat files that
 were previously ignored - make that a **separate commit** in the plan
@@ -71,26 +73,43 @@ were previously ignored - make that a **separate commit** in the plan
 
 Install `husky` and `lint-staged` as devDependencies, then:
 
-`lint-staged` config in `package.json`:
+`lint-staged.config.mjs` (a JS file, not a `package.json` key - the
+whole-project checks need function tasks, which JSON can't express):
 
-```json
-{
-  "lint-staged": {
-    "*": "prettier --write --ignore-unknown",
-    "*.{js,jsx,ts,tsx,mjs,cjs}": "eslint --fix"
-  }
-}
+```js
+export default {
+  '*': 'prettier --write --ignore-unknown',
+  '*.{js,jsx,ts,tsx,mjs,cjs}': 'eslint --fix',
+  // Functions, so lint-staged doesn't append the staged file names -
+  // these check the whole project.
+  '**': () => ['pnpm run typecheck', 'pnpm run test'],
+};
 ```
 
 `.husky/pre-commit` (using the detected package manager):
 
 ```sh
-pnpm exec lint-staged
-pnpm run typecheck
-pnpm run test
+pnpm exec lint-staged --concurrent false --hide-all
 ```
 
-Leave out the `typecheck` / `test` line when that script doesn't exist.
+Both flags matter:
+
+- `--hide-all` makes every check see exactly what gets committed. It hides
+  unstaged changes **and** untracked files while the tasks run, and
+  restores them afterwards, pass or fail. That's also why `typecheck` and
+  `test` run inside lint-staged instead of as extra hook lines after it: a
+  check run after lint-staged sees the whole working tree, so a staged file
+  that uses something only an unstaged or untracked file adds would pass,
+  and the commit would be broken on its own.
+- `--concurrent false` runs the tasks in order. A JS/TS file matches both
+  the Prettier and ESLint globs, and in parallel one tool's write can
+  clobber the other's; `typecheck` and `test` must also run after the fixes
+  are applied.
+
+Leave `typecheck` / `test` out of the `**` task when that script doesn't
+exist. An existing `lint-staged` key in `package.json` or other config file
+moves into `lint-staged.config.mjs` (in the plan).
+
 Playwright and Storybook tests stay **out** of the hook - see
 [[conventions]] for when they run instead.
 
@@ -108,8 +127,8 @@ Don't create a CI workflow from scratch here.
 
 Present the plan (installs, scripts added or changed, `.prettierignore`
 edits, hook files, CI step, the separate formatting commit) and apply only
-after approval. Then run the hook once (`pnpm exec lint-staged` isn't
-enough - run the full `.husky/pre-commit` sequence) so any existing
+after approval. Then run `format`, `lint`, `typecheck` and `test` once
+(the hook itself does nothing with no files staged) so any existing
 failures surface now; report them per [[conventions]]'s "pre-existing
 failure" steps rather than fixing them as part of setup.
 

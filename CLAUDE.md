@@ -78,7 +78,8 @@ only generated files are in `.prettierignore`.
 Verification follows the `verification` plugin's own conventions: the husky
 pre-commit hook (`.husky/pre-commit`, `lint-staged.config.js`) formats and
 lints staged files, validates plugins when plugin/marketplace files are
-staged, then runs `pnpm typecheck` and the full `pnpm test`. Never bypass it.
+staged, then runs `pnpm typecheck` and the full `pnpm test` - all against
+the staged snapshot only (`--hide-all`). Never bypass it.
 `.github/workflows/ci.yml` runs the same checks on every push and PR:
 
 - `pnpm lint` / `pnpm format` - this repo's own code against its own configs.
