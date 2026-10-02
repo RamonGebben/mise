@@ -149,12 +149,12 @@ You need [Claude Code](https://claude.com/claude-code) installed and logged
 in, and Node.js. Then, from the root of the project you want to set up:
 
 ```bash
-npx @pindakaasman/mise-place --marketplace RamonGebben/mise
+npx @pindakaasman/mise-place
 ```
 
-`RamonGebben/mise` is this GitHub repo. Without `--marketplace` the CLI
-looks for a local clone at `~/Projects/mise`, which is where mine lives.
-You can also set `MISE_MARKETPLACE` instead of passing the flag. See the
+This adds the marketplace from this GitHub repo (`RamonGebben/mise`). To use
+a local clone or a fork instead, pass `--marketplace <path-or-repo>` or set
+`MISE_MARKETPLACE`. See the
 [mise-place README](packages/mise-place) for details.
 
 ### Doing it by hand

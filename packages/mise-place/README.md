@@ -41,8 +41,8 @@ mise section is skipped or refreshed in place, never duplicated.
 ## Options
 
 - `--marketplace <path-or-url>` - use a marketplace source other than the
-  default (`~/Projects/mise`). Needed once the mise repo lives somewhere
-  other than that fixed local path (a different machine, a git remote).
+  default (`RamonGebben/mise`, the GitHub repo). Useful for testing against a
+  local clone or a fork.
 - `MISE_MARKETPLACE` environment variable - same, for when you don't want to
   pass a flag every time.
 
