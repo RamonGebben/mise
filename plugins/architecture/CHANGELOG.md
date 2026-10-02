@@ -1,5 +1,19 @@
 # @pindakaasman/architecture-plugin
 
+## 0.10.0
+
+### Minor Changes
+
+- 40b5325: Light and dark color modes.
+  
+  `@pindakaasman/design-system`: **breaking.** Color-bearing tokens (`colorPalette`, `gradient`, `boxShadow`) move from `colors`/the top level into `modes.light`, with an optional `modes.dark`. The `darker` color variant is renamed `emphasis`. `color()`, `gradient()` and `boxShadow()` now return CSS variables instead of literal values. New: `colorModeCss()` (the global CSS defining those variables per mode, following `prefers-color-scheme` unless overridden), `rawColor()` for a literal value in one mode, `hasDarkMode()`, and the standalone `setColorMode()`, `getColorMode()` and `colorModeScript()` (a pre-paint inline script that applies a saved override). The override is a `<meta name="ds-color-mode">` tag in `<head>` rather than an attribute on `<html>`, so it never causes a hydration mismatch and needs no `suppressHydrationWarning`.
+  
+  `architecture` plugin: the `design-system` skill documents color modes and their wiring (`ColorModeStyle` in the `ThemeProvider`, `colorModeScript()` in the root layout), seeds `modes.dark` from a project's existing dark styles, and the template ships a dark palette. `architecture:setup` audits for the pre-1.0 tokens shape, missing wiring, mode-specific CSS outside the theme, JS color math on accessor output, and `suppressHydrationWarning`.
+
+### Patch Changes
+
+- 8f088d6: `design-system` skill: for API details beyond the skill's docs, read the project's installed `node_modules/@pindakaasman/design-system/dist/*.d.ts` and README instead of the mise repo's source, so the reference always matches the version the project uses. `architecture:setup` now points at the theme template relative to the plugin instead of the mise repo root, so it resolves for installed plugins.
+
 ## 0.9.0
 
 ### Minor Changes
