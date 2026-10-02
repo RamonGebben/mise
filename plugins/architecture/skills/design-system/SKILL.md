@@ -69,6 +69,28 @@ scaffolded it _is_ the project's theme - no comment marking it as a
 template or placeholder. The dev changes its values in place whenever they
 want to.
 
+**Seeded from what the project already uses.** Before falling back to the
+template's defaults, populate the tokens from the values the project
+already has - global CSS and CSS variables, font imports (`next/font`,
+`@font-face`, Google Fonts links), `font-family`/`font-size`/`font-weight`
+declarations, colors, shadows, gradients, radii and spacing in stylesheets
+and styled-components literals, and the widths in existing media queries.
+Moving onto the theme should look like nothing changed: the app renders the
+same, and the dev doesn't have to spend time tuning the theme before it
+fits their own design.
+
+- Map a value to the token slot it actually plays (the color on primary
+  buttons and links is `primary`, the page background is `background`, the
+  body font is `fontFamily.base`). When several near-identical values fill
+  one slot, take the most-used one.
+- Fill the size and spacing scales from the values in use, sorted onto the
+  closest steps. A step with no matching value keeps the template's
+  default, and so does any token the project has no value for.
+- Only use values that are really in the project - don't invent brand
+  colors or a font the project doesn't load.
+- Seeding the theme from these values is what makes the later swap of
+  hardcoded values for accessor calls a clean, one-to-one mapping.
+
 **Rendering without a viewport.** `fontSize()`, `spacing()` and
 `spacingBetween()` resolve per breakpoint, which needs a viewport. During
 SSR there isn't one, so they fall back to the largest breakpoint. A

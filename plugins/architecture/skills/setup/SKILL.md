@@ -78,16 +78,21 @@ split) Next's App Router.
   (`plugins/architecture/skills/design-system/templates/theme/index.ts`),
   `src/providers/ThemeProvider/index.tsx`, and
   `src/providers/StyledComponentsRegistry/index.tsx` ([[styling]]), wired at
-  the app root. Scaffold it as the project's final theme: the default
-  values as they are, with no comment calling it a template or placeholder,
+  the app root. Scaffold it as the project's final theme, seeded from the
+  colors, fonts, sizes, spacing, shadows and breakpoints the project
+  already uses (see [[design-system]]'s "Seeded from what the project
+  already uses"), with the template's defaults only for tokens the project
+  has no value for. The plan lists which tokens came from where, so the dev
+  can check the mapping. No comment calling it a template or placeholder,
   and nothing in the plan asking for the values to be replaced - changing
   them is up to the dev. Don't invent brand colors.
 - **Not present, but the project already has a theme of some kind** (a
   Tailwind config, a plain styled-components `DefaultTheme`, CSS variables,
   etc.): don't silently replace it - present the existing theme's shape
   against `SystemTokens` and propose the migration as a plan (map the
-  existing values into the scaffolded tokens object, keeping the default for
-  any token the existing theme has no value for), applying only once
+  existing values into the scaffolded tokens object; a token the existing
+  theme has no value for is seeded from values used elsewhere in the
+  project, and only keeps the default when there are none), applying only once
   approved. Same as above: no template/placeholder comment. If
   the existing approach isn't styled-components at all, ask before proposing
   a wholesale swap - that's a bigger call than this skill should make
