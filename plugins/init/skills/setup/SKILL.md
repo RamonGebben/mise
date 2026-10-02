@@ -48,6 +48,12 @@ Once every plugin has been walked:
   wasn't covered and why.
 - Apply the combined plan only after the user approves it, running each
   plugin's steps in the order above.
+- After applying, run the project's checks - `format`, `lint`,
+  `typecheck`, `test` (whichever scripts exist). The result must be clean,
+  **warnings included**: a freshly set-up project that already warns
+  teaches everyone to ignore its warnings. Anything the applied plan
+  introduced gets fixed before reporting done; a failure that was there
+  before setup gets reported as pre-existing, not silently left.
 - Re-running this skill on a project it already set up must be a no-op, the
   same way each individual setup skill is safe to re-run.
 
