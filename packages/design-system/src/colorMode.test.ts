@@ -6,16 +6,36 @@ import {
   type ColorModeOptions,
 } from './colorMode.js';
 
-// Unit tests run without a DOM: fake just the pieces the helpers touch.
-const fakeRoot = () => {
-  const attributes = new Map<string, string>();
+// Unit tests run without a DOM: fake just the pieces the helpers touch -
+// <head>'s meta tags.
+interface FakeMeta {
+  name: string;
+  content: string;
+  remove: () => void;
+}
+
+const fakeDocument = () => {
+  const metas: Array<FakeMeta> = [];
   return {
-    attributes,
-    setAttribute: (name: string, value: string) => {
-      attributes.set(name, value);
+    metas,
+    createElement: () => {
+      const meta: FakeMeta = {
+        name: '',
+        content: '',
+        remove: () => {
+          metas.splice(metas.indexOf(meta), 1);
+        },
+      };
+      return meta;
     },
-    removeAttribute: (name: string) => {
-      attributes.delete(name);
+    head: {
+      appendChild: (meta: FakeMeta) => {
+        metas.push(meta);
+      },
+      querySelector: (selector: string) =>
+        selector === "meta[name='ds-color-mode']"
+          ? (metas.find(meta => meta.name === 'ds-color-mode') ?? null)
+          : null,
     },
   };
 };
@@ -46,13 +66,17 @@ const throwingStorage = {
   },
 };
 
-let root: ReturnType<typeof fakeRoot>;
+let doc: ReturnType<typeof fakeDocument>;
 let storage: ReturnType<typeof fakeStorage>;
 
+/** The mode the meta tag forces, if there is one. */
+const forcedMode = () =>
+  doc.metas.find(meta => meta.name === 'ds-color-mode')?.content;
+
 beforeEach(() => {
-  root = fakeRoot();
+  doc = fakeDocument();
   storage = fakeStorage();
-  vi.stubGlobal('document', { documentElement: root });
+  vi.stubGlobal('document', doc);
   vi.stubGlobal('localStorage', storage);
 });
 
@@ -65,27 +89,27 @@ const runScript = (options?: ColorModeOptions) => {
 };
 
 describe('colorModeScript', () => {
-  it('applies a saved mode to <html>', () => {
+  it('applies a saved mode as a meta tag in <head>', () => {
     storage.setItem('ds-color-mode', 'dark');
     runScript();
-    expect(root.attributes.get('data-mode')).toBe('dark');
+    expect(forcedMode()).toBe('dark');
   });
 
-  it('leaves <html> alone when nothing is saved', () => {
+  it('adds nothing when nothing is saved', () => {
     runScript();
-    expect(root.attributes.has('data-mode')).toBe(false);
+    expect(forcedMode()).toBeUndefined();
   });
 
   it('ignores a saved value that is not a mode', () => {
     storage.setItem('ds-color-mode', 'purple');
     runScript();
-    expect(root.attributes.has('data-mode')).toBe(false);
+    expect(forcedMode()).toBeUndefined();
   });
 
   it('reads the given storage key', () => {
     storage.setItem('my-app-mode', 'light');
     runScript({ storageKey: 'my-app-mode' });
-    expect(root.attributes.get('data-mode')).toBe('light');
+    expect(forcedMode()).toBe('light');
   });
 
   it('does not throw when storage is blocked', () => {
@@ -120,15 +144,30 @@ describe('getColorMode', () => {
 describe('setColorMode', () => {
   it('applies and saves a mode', () => {
     setColorMode('dark');
-    expect(root.attributes.get('data-mode')).toBe('dark');
+    expect(forcedMode()).toBe('dark');
     expect(storage.items.get('ds-color-mode')).toBe('dark');
   });
 
   it('clears the override for system', () => {
     setColorMode('dark');
     setColorMode('system');
-    expect(root.attributes.has('data-mode')).toBe(false);
+    expect(forcedMode()).toBeUndefined();
     expect(storage.items.has('ds-color-mode')).toBe(false);
+  });
+
+  it('updates the existing meta tag instead of adding another', () => {
+    setColorMode('dark');
+    setColorMode('light');
+    expect(doc.metas).toHaveLength(1);
+    expect(forcedMode()).toBe('light');
+  });
+
+  it('takes over the meta tag the script added', () => {
+    storage.setItem('ds-color-mode', 'dark');
+    runScript();
+    setColorMode('light');
+    expect(doc.metas).toHaveLength(1);
+    expect(forcedMode()).toBe('light');
   });
 
   it('saves under the given storage key', () => {
@@ -139,7 +178,7 @@ describe('setColorMode', () => {
   it('still applies the mode when storage is blocked', () => {
     vi.stubGlobal('localStorage', throwingStorage);
     setColorMode('dark');
-    expect(root.attributes.get('data-mode')).toBe('dark');
+    expect(forcedMode()).toBe('dark');
   });
 
   it('does nothing without a document (SSR)', () => {

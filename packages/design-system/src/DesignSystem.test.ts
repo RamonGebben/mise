@@ -405,19 +405,19 @@ describe('DesignSystem', () => {
       const output = css(theme);
 
       expect(output).not.toContain('prefers-color-scheme');
-      expect(output).not.toContain('data-mode');
+      expect(output).not.toContain('ds-color-mode');
       expect(output).not.toContain('color-scheme: dark');
     });
 
     it('applies dark when the OS prefers it, unless light is forced', () => {
       expect(css(new DesignSystem(tokensWithDark))).toContain(
-        "@media (prefers-color-scheme: dark) { :root:not([data-mode='light']) { color-scheme: dark; --ds-color-error-base: #ff6b6b;",
+        "@media (prefers-color-scheme: dark) { :root:not(:has(meta[name='ds-color-mode'][content='light'])) { color-scheme: dark; --ds-color-error-base: #ff6b6b;",
       );
     });
 
     it('applies dark when forced, regardless of the OS', () => {
       expect(css(new DesignSystem(tokensWithDark))).toContain(
-        ":root[data-mode='dark'] { color-scheme: dark; --ds-color-error-base: #ff6b6b;",
+        ":root:has(meta[name='ds-color-mode'][content='dark']) { color-scheme: dark; --ds-color-error-base: #ff6b6b;",
       );
     });
 
@@ -425,7 +425,7 @@ describe('DesignSystem', () => {
       const names = (block: string) => block.match(/--ds-[\w-]+/g)?.sort();
       const [light, systemDark, forcedDark] = new DesignSystem(tokensWithDark)
         .colorModeCss()
-        .split(/(?=@media|:root\[)/);
+        .split(/(?=@media|:root:has)/);
 
       expect(names(systemDark)).toEqual(names(light));
       expect(names(forcedDark)).toEqual(names(light));

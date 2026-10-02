@@ -33,7 +33,7 @@ export type { BaseColor, BaseColorVariant } from './colorPalette.js';
 export type { ColorString, CssVar } from './types.js';
 
 export {
-  COLOR_MODE_ATTRIBUTE,
+  COLOR_MODE_META,
   colorModeScript,
   getColorMode,
   setColorMode,

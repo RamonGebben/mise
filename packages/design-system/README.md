@@ -82,12 +82,14 @@ const GlobalStyle = createGlobalStyle`
 - Without `modes.dark` the theme is light-only and ignores the OS preference.
 
 Let users override the OS with `setColorMode('light' | 'dark' | 'system')`.
-It sets `data-mode` on `<html>` and saves the choice in `localStorage`.
-`getColorMode()` reads it back (`'system'` when nothing's saved). To apply a
-saved choice before first paint, inline `colorModeScript()` in `<head>`:
+It saves the choice in `localStorage` and marks it with a
+`<meta name="ds-color-mode">` tag in `<head>`, which `colorModeCss()` selects
+on (`:root:has(…)`). `getColorMode()` reads the choice back (`'system'` when
+nothing's saved). To apply a saved choice before first paint, inline
+`colorModeScript()` in `<head>`:
 
 ```tsx
-<html suppressHydrationWarning>
+<html>
   <head>
     <script dangerouslySetInnerHTML={{ __html: colorModeScript() }} />
   </head>
@@ -96,6 +98,13 @@ saved choice before first paint, inline `colorModeScript()` in `<head>`:
 ```
 
 All three take an optional `{ storageKey }` (default `'ds-color-mode'`).
+
+**Why a meta tag, not an attribute on `<html>`:** the server can't know the
+saved choice, so an attribute the script adds to `<html>` would differ from
+the server's HTML - a hydration mismatch. React 19 skips tags in `<head>` it
+didn't render, so the meta tag hydrates cleanly, with no
+`suppressHydrationWarning` needed. Requires `:has()` (every current browser
+since 2023).
 
 Since the accessors return variables, JS color math on them won't work. Use
 `rawColor(hue, variant, mode)` for the literal value of one mode.
@@ -150,7 +159,7 @@ the published contract (see [`src/tokens.ts`](src/tokens.ts) and
 [`src/colorPalette.ts`](src/colorPalette.ts) for the exact members).
 
 Standalone exports: `colorModeScript(options?)`, `getColorMode(options?)`,
-`setColorMode(mode, options?)` and `COLOR_MODE_ATTRIBUTE` (`'data-mode'`) -
+`setColorMode(mode, options?)` and `COLOR_MODE_META` (`'ds-color-mode'`) -
 see [Color modes](#color-modes).
 
 For how this gets scaffolded and provided as a `styled-components` theme in

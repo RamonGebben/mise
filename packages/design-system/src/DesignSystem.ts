@@ -13,7 +13,7 @@ import { BaseColor, BaseColorVariant } from './colorPalette.js';
 import type { SystemModeTokens, SystemTokens } from './system.js';
 import { path } from 'ramda';
 import type { ColorString, CssVar } from './types.js';
-import { COLOR_MODE_ATTRIBUTE, type ColorMode } from './colorMode.js';
+import { COLOR_MODE_META, type ColorMode } from './colorMode.js';
 
 /**
  * Whether there's a viewport to measure. False wherever there's no DOM -
@@ -247,7 +247,7 @@ export default class DesignSystem {
    * colorModeCss()
    * the global CSS defining every color variable the accessors return: light
    * on :root, dark when the OS prefers it, and either one forced by
-   * `data-mode` on <html> (see setColorMode()). Light-only without dark
+   * the color-mode meta tag (see setColorMode()). Light-only without dark
    * tokens.
    */
   public colorModeCss(): string {
@@ -256,8 +256,9 @@ export default class DesignSystem {
 
     if (dark === undefined) return lightRules;
 
-    const attr = COLOR_MODE_ATTRIBUTE;
-    const systemDark = ruleset(`:root:not([${attr}='light'])`, 'dark', dark)
+    const forced = (mode: ColorMode) =>
+      `:has(meta[name='${COLOR_MODE_META}'][content='${mode}'])`;
+    const systemDark = ruleset(`:root:not(${forced('light')})`, 'dark', dark)
       .split('\n')
       .map(line => `  ${line}`)
       .join('\n');
@@ -265,7 +266,7 @@ export default class DesignSystem {
     return [
       lightRules,
       `@media (prefers-color-scheme: dark) {\n${systemDark}\n}`,
-      ruleset(`:root[${attr}='dark']`, 'dark', dark),
+      ruleset(`:root${forced('dark')}`, 'dark', dark),
     ].join('\n');
   }
 

@@ -218,19 +218,35 @@ export const ColorModeStyle = createGlobalStyle`
 
 With `modes.dark`, the root layout also inlines `colorModeScript()` in
 `<head>`. It applies a saved override before first paint, so a user who
-picked a mode never sees the other one flash first. It changes `<html>`'s
-attributes before React hydrates, hence `suppressHydrationWarning`:
+picked a mode never sees the other one flash first:
 
 ```tsx
 // src/app/layout.tsx
 import { colorModeScript } from '@pindakaasman/design-system';
 
-<html lang="en" suppressHydrationWarning>
+<html lang="en">
   <head>
     <script dangerouslySetInnerHTML={{ __html: colorModeScript() }} />
   </head>
   <body>…</body>
 </html>;
+```
+
+**No `suppressHydrationWarning`.** Prevent a hydration mismatch rather
+than silence it: a suppressed warning hides the next, real mismatch on the
+same element too. That's why the override is a `<meta>` tag the script adds
+to `<head>`, not an attribute on `<html>` - the server can't know the saved
+choice, so an attribute would differ from the server's HTML, while React 19
+skips tags in `<head>` it didn't render.
+
+```tsx
+// bad - the script changes <html>, so the warning gets silenced instead
+<html lang="en" suppressHydrationWarning>
+```
+
+```tsx
+// good - nothing React rendered changes before hydration
+<html lang="en">
 ```
 
 A toggle is just UI calling `setColorMode()` (and `getColorMode()` for the

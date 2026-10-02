@@ -1,8 +1,14 @@
 // Switching between color modes happens in CSS, not by swapping themes: the
 // accessors return CSS variables, DesignSystem.colorModeCss() defines them per
-// mode, and the `data-mode` attribute on <html> overrides the OS preference.
-// These helpers manage that attribute and remember the choice. They only
-// touch the DOM, so they work with any framework (or none).
+// mode, and a `<meta name="ds-color-mode">` in <head> overrides the OS
+// preference. These helpers manage that meta tag and remember the choice.
+// They only touch the DOM, so they work with any framework (or none).
+//
+// Why a meta tag rather than an attribute on <html>: the override is applied
+// before hydration, and the server can't know it. An attribute on an element
+// the framework renders would differ from the server's HTML - a hydration
+// mismatch. A tag the framework never rendered is skipped by hydration (React
+// 19 ignores unexpected nodes in <head>), so server and client agree.
 
 export type ColorMode = 'light' | 'dark';
 
@@ -14,7 +20,10 @@ export interface ColorModeOptions {
   storageKey?: string;
 }
 
-export const COLOR_MODE_ATTRIBUTE = 'data-mode';
+/** `name` of the meta tag whose `content` is the forced mode. */
+export const COLOR_MODE_META = 'ds-color-mode';
+
+const metaSelector = `meta[name='${COLOR_MODE_META}']`;
 
 const DEFAULT_STORAGE_KEY = 'ds-color-mode';
 
@@ -52,7 +61,8 @@ export const colorModeScript = ({
   storageKey = DEFAULT_STORAGE_KEY,
 }: ColorModeOptions = {}): string =>
   `(function(){try{var m=localStorage.getItem(${JSON.stringify(storageKey)});` +
-  `if(m==='light'||m==='dark')document.documentElement.setAttribute('${COLOR_MODE_ATTRIBUTE}',m);}catch(e){}})();`;
+  `if(m!=='light'&&m!=='dark')return;var e=document.createElement('meta');` +
+  `e.name='${COLOR_MODE_META}';e.content=m;document.head.appendChild(e);}catch(e){}})();`;
 
 /**
  * getColorMode()
@@ -77,13 +87,17 @@ export const setColorMode = (
 ): void => {
   if (typeof document === 'undefined') return;
 
-  const root = document.documentElement;
+  const existing = document.head.querySelector<HTMLMetaElement>(metaSelector);
 
   if (mode === 'system') {
-    root.removeAttribute(COLOR_MODE_ATTRIBUTE);
+    existing?.remove();
     writeStorage(storageKey, null);
-  } else {
-    root.setAttribute(COLOR_MODE_ATTRIBUTE, mode);
-    writeStorage(storageKey, mode);
+    return;
   }
+
+  const meta = existing ?? document.createElement('meta');
+  meta.name = COLOR_MODE_META;
+  meta.content = mode;
+  if (!existing) document.head.appendChild(meta);
+  writeStorage(storageKey, mode);
 };

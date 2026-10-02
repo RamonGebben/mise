@@ -112,7 +112,12 @@ split) Next's App Router.
   - `ThemeProvider` not rendering `ColorModeStyle` → add it. Without it
     every color accessor resolves to an undefined CSS variable.
   - `modes.dark` present but no `colorModeScript()` in the root layout's
-    `<head>`, or no `suppressHydrationWarning` on `<html>` → add them.
+    `<head>` → add it.
+  - `suppressHydrationWarning` on `<html>` that was only there for a mode
+    switch (e.g. `next-themes`' class or attribute) → remove it once the
+    switch is replaced. Any other `suppressHydrationWarning` → list the
+    mismatch it hides as a case needing a human call, rather than leaving
+    it silenced.
   - Mode-specific styling outside the theme (`prefers-color-scheme` media
     queries, `.dark`/`[data-theme]` selectors, in styled-components literals
     or global CSS) → move the values into `modes.dark` (seeding it per
