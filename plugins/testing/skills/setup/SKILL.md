@@ -61,9 +61,22 @@ For each tool that applies:
   flag any component under `atoms/molecules/organisms/templates` missing its
   `index.stories.tsx`.
 - **Playwright.** Check for `@playwright/test` installed and a config. If
-  missing, propose installing and scaffolding an empty `e2e/` folder (no
-  subfolders yet - those get added per-domain as real tasks are written, per
-  [[conventions]]). Flag any existing e2e suite organized by page rather
+  missing, propose installing it, with a `webServer` in the config that
+  starts the app so `playwright test` runs on its own. If `e2e/` has no
+  spec, propose one so the suite is never empty (an empty suite fails with
+  "No tests found", and leaves nothing to show the setup works):
+  - **The project already has real flows** (forms, links between routes):
+    one spec for the most central user task found, per [[conventions]]'s
+    `e2e/<domain>/<task-name>.spec.ts` - e.g. `e2e/auth/sign-in.spec.ts`.
+  - **A blank starter** (only the generated home route): one spec for the
+    only task there is, opening the app - `e2e/app/open-the-app.spec.ts`,
+    asserting the home route responds OK and its main content is visible.
+    Assert on what the page renders, not on external links (`create-next-app`'s
+    Vercel/docs links go off-site), so the test doesn't depend on the
+    network.
+
+  Write it as a real test, not a placeholder - no comment telling the dev
+  to replace it. Flag any existing e2e suite organized by page rather
   than by user task (e.g. `cosplan-page.spec.ts`) as a migration candidate,
   without inventing the reorganization yourself - proposing a new folder
   structure needs to know the actual user tasks involved, not just the
