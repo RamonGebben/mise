@@ -55,6 +55,13 @@ For each tool that applies:
   `vitest.config.ts` (or `vite.config.ts`) in a CommonJS package - including
   one `storybook init` just generated - gets renamed to `.mts` in the plan.
 
+  The `unit` project sets an explicit `include` for colocated unit tests
+  (`src/**/*.test.{ts,tsx}`) and excludes `e2e/**`. Vitest's default
+  include matches any `*.spec.ts`, so without it `vitest` picks up the
+  Playwright specs in `e2e/` and fails on them ("Playwright Test did not
+  expect test() to be called here") - which breaks the pre-commit `test`
+  task as soon as the first e2e spec exists.
+
 - **Storybook.** Check for `@storybook/*` installed and a `.storybook/`
   config. If missing, propose installing (`npx storybook@latest init` is the
   standard bootstrap - use it rather than hand-assembling the config) and

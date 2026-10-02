@@ -7,7 +7,7 @@
 // staged, never unstaged edits or untracked files.
 const config = {
   '*': 'prettier --write --ignore-unknown',
-  '*.{js,jsx,ts,tsx,mjs,cjs}': 'eslint --fix',
+  '*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': 'eslint --fix',
   '{.claude-plugin,plugins}/**': () => 'claude plugin validate .',
   '**': () => ['pnpm run typecheck', 'pnpm run test'],
 };

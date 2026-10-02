@@ -170,8 +170,9 @@ export const Title = styled.h1`
 **Fallback only:** if a styled definition genuinely can't be split out yet,
 it goes **below** the main component, never above it - and it's an open
 item to split, not an accepted end state. (Module-level `const`s used inside
-the component body are fine below it; only a styled definition that extends
-another one, `styled(Other)`, has to come after `Other`.)
+the component body are fine below it; only a styled definition that
+references another one at definition time - extending it, `styled(Other)`,
+or using it as a selector, `${Other}` - has to come after `Other`.)
 
 ## Component-specific hooks
 
