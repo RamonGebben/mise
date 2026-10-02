@@ -44,6 +44,17 @@ For each tool that applies:
   DOM-based project outright without asking, in case something legitimately
   depends on it; flag it against [[conventions]]'s "if a test needs jsdom,
   it's not a unit test" instead.
+
+  The config file is `vitest.config.mts` unless the closest `package.json`
+  sets `"type": "module"` (then `vitest.config.ts` is fine). A `.ts` config
+  in a CommonJS package (the `create-next-app` default) is ESM syntax loaded
+  as CommonJS, which Vite warns about on every run and won't load at all
+  once its native config loader becomes the default. Same reasoning as
+  `eslint.config.mjs`: name the file for the module system it's written in,
+  rather than flipping the whole package to `"type": "module"`. An existing
+  `vitest.config.ts` (or `vite.config.ts`) in a CommonJS package - including
+  one `storybook init` just generated - gets renamed to `.mts` in the plan.
+
 - **Storybook.** Check for `@storybook/*` installed and a `.storybook/`
   config. If missing, propose installing (`npx storybook@latest init` is the
   standard bootstrap - use it rather than hand-assembling the config) and
