@@ -62,25 +62,55 @@ const tokens: SystemTokens = {
       },
     },
   },
-  colors: {
-    colorPalette: {
-      error: { base: '#e5484d', text: '#ffffff', darker: '#b3221f' },
-      formBackground: { base: '#f5f5f5', text: '#1a1a1a', darker: '#e0e0e0' },
-      background: { base: '#ffffff', text: '#1a1a1a', darker: '#f0f0f0' },
-      primary: { base: '#3b82f6', text: '#ffffff', darker: '#1d4ed8' },
-      secondary: { base: '#6b7280', text: '#ffffff', darker: '#374151' },
-      tertiary: { base: '#8b5cf6', text: '#ffffff', darker: '#5b21b6' },
-      quaternary: { base: '#f59e0b', text: '#1a1a1a', darker: '#b45309' },
+  modes: {
+    light: {
+      colorPalette: {
+        error: { base: '#e5484d', text: '#ffffff', emphasis: '#b3221f' },
+        formBackground: {
+          base: '#f5f5f5',
+          text: '#1a1a1a',
+          emphasis: '#e0e0e0',
+        },
+        background: { base: '#ffffff', text: '#1a1a1a', emphasis: '#f0f0f0' },
+        primary: { base: '#3b82f6', text: '#ffffff', emphasis: '#1d4ed8' },
+        secondary: { base: '#6b7280', text: '#ffffff', emphasis: '#374151' },
+        tertiary: { base: '#8b5cf6', text: '#ffffff', emphasis: '#5b21b6' },
+        quaternary: { base: '#f59e0b', text: '#1a1a1a', emphasis: '#b45309' },
+      },
+      gradient: {
+        menu: 'linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%)',
+        hero: 'linear-gradient(90deg, #8b5cf6 0%, #3b82f6 100%)',
+      },
+      boxShadow: {
+        base: '0 1px 2px rgba(0, 0, 0, 0.08)',
+        card: '0 2px 8px rgba(0, 0, 0, 0.12)',
+        modal: '0 8px 24px rgba(0, 0, 0, 0.2)',
+      },
     },
-    gradient: {
-      menu: 'linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%)',
-      hero: 'linear-gradient(90deg, #8b5cf6 0%, #3b82f6 100%)',
+    dark: {
+      colorPalette: {
+        error: { base: '#ff6369', text: '#1a1a1a', emphasis: '#ff9592' },
+        formBackground: {
+          base: '#1f1f1f',
+          text: '#ededed',
+          emphasis: '#2e2e2e',
+        },
+        background: { base: '#111111', text: '#ededed', emphasis: '#1c1c1c' },
+        primary: { base: '#60a5fa', text: '#0b1220', emphasis: '#93c5fd' },
+        secondary: { base: '#9ca3af', text: '#111111', emphasis: '#d1d5db' },
+        tertiary: { base: '#a78bfa', text: '#111111', emphasis: '#c4b5fd' },
+        quaternary: { base: '#fbbf24', text: '#1a1a1a', emphasis: '#fcd34d' },
+      },
+      gradient: {
+        menu: 'linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%)',
+        hero: 'linear-gradient(90deg, #a78bfa 0%, #60a5fa 100%)',
+      },
+      boxShadow: {
+        base: '0 1px 2px rgba(0, 0, 0, 0.4)',
+        card: '0 2px 8px rgba(0, 0, 0, 0.5)',
+        modal: '0 8px 24px rgba(0, 0, 0, 0.6)',
+      },
     },
-  },
-  boxShadow: {
-    base: '0 1px 2px rgba(0, 0, 0, 0.08)',
-    card: '0 2px 8px rgba(0, 0, 0, 0.12)',
-    modal: '0 8px 24px rgba(0, 0, 0, 0.2)',
   },
   zIndex: {
     base: 0,

@@ -9,7 +9,8 @@ export type {
   SystemBreakpoints,
   SystemColorPaletteColor,
   SystemColorPalette,
-  SystemColor,
+  SystemModeTokens,
+  SystemModes,
   SystemZIndexScale,
   SystemScale,
   SystemSpacing,
@@ -29,4 +30,16 @@ export type {
 
 export type { BaseColor, BaseColorVariant } from './colorPalette.js';
 
-export type { ColorString } from './types.js';
+export type { ColorString, CssVar } from './types.js';
+
+export {
+  COLOR_MODE_META,
+  colorModeScript,
+  getColorMode,
+  setColorMode,
+} from './colorMode.js';
+export type {
+  ColorMode,
+  ColorModeOptions,
+  ColorModePreference,
+} from './colorMode.js';

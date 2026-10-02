@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import DesignSystem from './DesignSystem.js';
-import type { SystemTokens } from './system.js';
+import type { SystemModeTokens, SystemTokens } from './system.js';
 
 const tokens: SystemTokens = {
   breakpoints: {
@@ -93,27 +93,59 @@ const tokens: SystemTokens = {
       },
     },
   },
-  colors: {
-    colorPalette: {
-      error: { base: '#d32f2f', text: '#ffffff', darker: '#9a0007' },
-      formBackground: { base: '#fafafa', text: '#111111', darker: '#eeeeee' },
-      background: { base: '#ffffff', text: '#111111', darker: '#f0f0f0' },
-      primary: { base: '#0055ff', text: '#ffffff', darker: '#0033aa' },
-      secondary: { base: '#ff5500', text: '#ffffff', darker: '#aa3300' },
-      tertiary: { base: '#00aa55', text: '#ffffff', darker: '#007733' },
-      quaternary: { base: '#aa00ff', text: '#ffffff', darker: '#7700aa' },
-    },
-    gradient: {
-      menu: 'linear-gradient(#000, #111)',
-      hero: 'linear-gradient(#0055ff, #aa00ff)',
+  modes: {
+    light: {
+      colorPalette: {
+        error: { base: '#d32f2f', text: '#ffffff', emphasis: '#9a0007' },
+        formBackground: {
+          base: '#fafafa',
+          text: '#111111',
+          emphasis: '#eeeeee',
+        },
+        background: { base: '#ffffff', text: '#111111', emphasis: '#f0f0f0' },
+        primary: { base: '#0055ff', text: '#ffffff', emphasis: '#0033aa' },
+        secondary: { base: '#ff5500', text: '#ffffff', emphasis: '#aa3300' },
+        tertiary: { base: '#00aa55', text: '#ffffff', emphasis: '#007733' },
+        quaternary: { base: '#aa00ff', text: '#ffffff', emphasis: '#7700aa' },
+      },
+      gradient: {
+        menu: 'linear-gradient(#000, #111)',
+        hero: 'linear-gradient(#0055ff, #aa00ff)',
+      },
+      boxShadow: {
+        base: '0 1px 2px rgba(0,0,0,0.1)',
+        card: '0 2px 8px rgba(0,0,0,0.15)',
+        modal: '0 8px 32px rgba(0,0,0,0.3)',
+      },
     },
   },
   zIndex: { base: 0, dropdown: 10, sticky: 20, modal: 30, toast: 40 },
-  boxShadow: {
-    base: '0 1px 2px rgba(0,0,0,0.1)',
-    card: '0 2px 8px rgba(0,0,0,0.15)',
-    modal: '0 8px 32px rgba(0,0,0,0.3)',
+};
+
+const dark: SystemModeTokens = {
+  colorPalette: {
+    error: { base: '#ff6b6b', text: '#111111', emphasis: '#ff9999' },
+    formBackground: { base: '#1e1e1e', text: '#eeeeee', emphasis: '#2a2a2a' },
+    background: { base: '#121212', text: '#eeeeee', emphasis: '#1e1e1e' },
+    primary: { base: '#5c8dff', text: '#111111', emphasis: '#8fb0ff' },
+    secondary: { base: '#ff8a4d', text: '#111111', emphasis: '#ffab80' },
+    tertiary: { base: '#33cc77', text: '#111111', emphasis: '#66dd99' },
+    quaternary: { base: '#cc66ff', text: '#111111', emphasis: '#dd99ff' },
   },
+  gradient: {
+    menu: 'linear-gradient(#111, #222)',
+    hero: 'linear-gradient(#5c8dff, #cc66ff)',
+  },
+  boxShadow: {
+    base: '0 1px 2px rgba(0,0,0,0.5)',
+    card: '0 2px 8px rgba(0,0,0,0.6)',
+    modal: '0 8px 32px rgba(0,0,0,0.8)',
+  },
+};
+
+const tokensWithDark: SystemTokens = {
+  ...tokens,
+  modes: { ...tokens.modes, dark },
 };
 
 // Unit tests run without a DOM: fake a viewport of the given width by
@@ -282,33 +314,121 @@ describe('DesignSystem', () => {
   });
 
   describe('color', () => {
-    it('returns the base variant by default', () => {
-      expect(theme.color('primary')).toBe('#0055ff');
+    it('returns the base variant by default, as a CSS variable', () => {
+      expect(theme.color('primary')).toBe('var(--ds-color-primary-base)');
     });
 
     it('returns the requested variant', () => {
-      expect(theme.color('primary', 'text')).toBe('#ffffff');
-      expect(theme.color('error', 'darker')).toBe('#9a0007');
+      expect(theme.color('error', 'emphasis')).toBe(
+        'var(--ds-color-error-emphasis)',
+      );
+    });
+
+    it('kebab-cases camelCase hues', () => {
+      expect(theme.color('formBackground', 'text')).toBe(
+        'var(--ds-color-form-background-text)',
+      );
+    });
+  });
+
+  describe('rawColor', () => {
+    const themeWithDark = new DesignSystem(tokensWithDark);
+
+    it('returns the light value of the base variant by default', () => {
+      expect(themeWithDark.rawColor('primary')).toBe('#0055ff');
+    });
+
+    it('returns the value for the requested variant and mode', () => {
+      expect(themeWithDark.rawColor('primary', 'emphasis', 'dark')).toBe(
+        '#8fb0ff',
+      );
+    });
+
+    it('falls back to light when there is no dark mode', () => {
+      expect(theme.rawColor('primary', 'base', 'dark')).toBe('#0055ff');
     });
   });
 
   describe('gradient', () => {
-    it('returns the menu gradient by default', () => {
-      expect(theme.gradient()).toBe('linear-gradient(#000, #111)');
+    it('returns the menu gradient by default, as a CSS variable', () => {
+      expect(theme.gradient()).toBe('var(--ds-gradient-menu)');
     });
 
     it('returns the requested gradient', () => {
-      expect(theme.gradient('hero')).toBe('linear-gradient(#0055ff, #aa00ff)');
+      expect(theme.gradient('hero')).toBe('var(--ds-gradient-hero)');
     });
   });
 
   describe('boxShadow', () => {
-    it('returns the base shadow by default', () => {
-      expect(theme.boxShadow()).toBe('0 1px 2px rgba(0,0,0,0.1)');
+    it('returns the base shadow by default, as a CSS variable', () => {
+      expect(theme.boxShadow()).toBe('var(--ds-shadow-base)');
     });
 
     it('returns the requested shadow', () => {
-      expect(theme.boxShadow('modal')).toBe('0 8px 32px rgba(0,0,0,0.3)');
+      expect(theme.boxShadow('modal')).toBe('var(--ds-shadow-modal)');
+    });
+  });
+
+  describe('hasDarkMode', () => {
+    it('is false without dark tokens', () => {
+      expect(theme.hasDarkMode()).toBe(false);
+    });
+
+    it('is true with dark tokens', () => {
+      expect(new DesignSystem(tokensWithDark).hasDarkMode()).toBe(true);
+    });
+  });
+
+  describe('colorModeCss', () => {
+    // Collapse whitespace so assertions don't depend on indentation.
+    const css = (system: DesignSystem) =>
+      system.colorModeCss().replace(/\s+/g, ' ');
+
+    it('defines every accessor variable on :root with the light values', () => {
+      const output = css(theme);
+
+      expect(output).toMatch(/^:root \{ color-scheme: light;/);
+      expect(output).toContain('--ds-color-primary-base: #0055ff;');
+      expect(output).toContain('--ds-color-form-background-emphasis: #eeeeee;');
+      expect(output).toContain(
+        '--ds-gradient-hero: linear-gradient(#0055ff, #aa00ff);',
+      );
+      expect(output).toContain('--ds-shadow-card: 0 2px 8px rgba(0,0,0,0.15);');
+    });
+
+    it('defines one variable per palette, gradient and shadow token', () => {
+      const count = theme.colorModeCss().match(/--ds-/g)?.length;
+      expect(count).toBe(7 * 3 + 2 + 3);
+    });
+
+    it('is light-only without dark tokens', () => {
+      const output = css(theme);
+
+      expect(output).not.toContain('prefers-color-scheme');
+      expect(output).not.toContain('ds-color-mode');
+      expect(output).not.toContain('color-scheme: dark');
+    });
+
+    it('applies dark when the OS prefers it, unless light is forced', () => {
+      expect(css(new DesignSystem(tokensWithDark))).toContain(
+        "@media (prefers-color-scheme: dark) { :root:not(:has(meta[name='ds-color-mode'][content='light'])) { color-scheme: dark; --ds-color-error-base: #ff6b6b;",
+      );
+    });
+
+    it('applies dark when forced, regardless of the OS', () => {
+      expect(css(new DesignSystem(tokensWithDark))).toContain(
+        ":root:has(meta[name='ds-color-mode'][content='dark']) { color-scheme: dark; --ds-color-error-base: #ff6b6b;",
+      );
+    });
+
+    it('defines the same variables in every mode', () => {
+      const names = (block: string) => block.match(/--ds-[\w-]+/g)?.sort();
+      const [light, systemDark, forcedDark] = new DesignSystem(tokensWithDark)
+        .colorModeCss()
+        .split(/(?=@media|:root:has)/);
+
+      expect(names(systemDark)).toEqual(names(light));
+      expect(names(forcedDark)).toEqual(names(light));
     });
   });
 
@@ -345,7 +465,9 @@ describe('DesignSystem', () => {
 
   describe('get', () => {
     it('returns the value at a dot-separated path', () => {
-      expect(theme.get('colors.colorPalette.secondary.darker')).toBe('#aa3300');
+      expect(theme.get('modes.light.colorPalette.secondary.emphasis')).toBe(
+        '#aa3300',
+      );
       expect(theme.get('type.fontFamily.base')).toBe('Inter, sans-serif');
     });
 
@@ -354,7 +476,7 @@ describe('DesignSystem', () => {
     });
 
     it('returns undefined for a path that does not exist', () => {
-      expect(theme.get('colors.nope.base')).toBeUndefined();
+      expect(theme.get('modes.nope.base')).toBeUndefined();
     });
   });
 
