@@ -101,8 +101,8 @@ project by the skill that documents the package.
 ```
 npx @pindakaasman/mise-place
   │
-  ├─ claude plugin marketplace add <mise repo>     register the catalog
-  ├─ claude plugin install <plugin>@mise           once per plugin
+  ├─ claude plugin marketplace add <mise repo>     register the catalog (or update it)
+  ├─ claude plugin install <plugin>@mise           once per plugin (or update it)
   └─ claude /init:setup                            start a Claude session
         │
         ├─ /typescript:setup     ┐
@@ -177,6 +177,9 @@ npm install -D @pindakaasman/eslint-config @pindakaasman/prettier-config @pindak
 ```
 
 ### Getting updates
+
+Running `npx @pindakaasman/mise-place` again updates the marketplace and
+every installed plugin before starting `/init:setup`. By hand:
 
 ```bash
 claude plugin marketplace update mise

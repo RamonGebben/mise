@@ -13,10 +13,11 @@ npx @pindakaasman/mise-place
 1. **Checks `claude` is on `PATH`.** If it isn't, prints a link to install
    Claude Code and exits - nothing else runs.
 2. **Adds the `mise` marketplace**, from the resolved source (see Options
-   below), unless it's already added.
+   below), or updates it from its source if it's already added.
 3. **Installs every mise plugin** (`typescript`, `architecture`, `react`,
-   `testing`, `verification`, `init`) at user scope, skipping any that are
-   already installed.
+   `testing`, `verification`, `init`) at user scope, or updates any that
+   are already installed - so every run picks up the latest released
+   versions.
 4. **Hands off** into an interactive `claude` session in the current
    directory, already running `/init:setup`.
 
@@ -56,6 +57,5 @@ mise section is skipped or refreshed in place, never duplicated.
 
 - **`claude CLI not found on PATH`** - install Claude Code first; this tool
   doesn't attempt to install it for you.
-- **Marketplace or plugin install fails** - re-running is safe; only the
-  step that failed retries, since everything already done is detected and
-  skipped.
+- **Marketplace or plugin install fails** - re-running is safe; anything
+  already added or installed is updated rather than added again.
