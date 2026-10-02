@@ -42,6 +42,18 @@ split) Next's App Router.
     missing, `components/` and `hooks/` for anything private to it), per
     [[folder-structure]]'s component folder shape.
   - **Import fixups.** Update every import referencing the old location.
+- **Styled-component definitions inside a component file** (including files
+  this setup itself writes while migrating, e.g. a Tailwind page rewritten
+  to styled-components) - every `styled.*`/`styled(...)` const in a
+  component's `index.tsx` other than its own export gets split into its own
+  folder, per [[folder-structure]]'s "Styled components are components":
+  generic primitives (a `Button` with variants, a `Code` chip, a link) go to
+  the matching atomic tier, owner-specific pieces nest under the owner's
+  `components/` - grouped into a sub-component with its own `components/`
+  where they form a unit, not a flat list. Each new folder's `index.tsx` is
+  the styled export itself, plus an `index.stories.tsx`. If one genuinely
+  can't be split, move it below the main component and list it in the plan
+  as still open.
 - A component-specific hook found outside a `hooks/<hookName>/index.ts`
   shape (a loose `useThing.ts`) gets the same folder migration, per
   [[folder-structure]]'s hook-extraction section - and flag (don't
