@@ -63,9 +63,18 @@ const installedPluginIds = (): Set<string> => {
   return new Set(ids);
 };
 
-const ensureMarketplaceAdded = (source: string): void => {
+const ensureMarketplaceLatest = (source: string): void => {
   if (isMarketplaceAdded()) {
-    console.log(`Marketplace "${MARKETPLACE_NAME}" already added.`);
+    console.log(`Updating marketplace "${MARKETPLACE_NAME}"...`);
+    const status = runInherited('claude', [
+      'plugin',
+      'marketplace',
+      'update',
+      MARKETPLACE_NAME,
+    ]);
+    if (status !== 0) {
+      throw new Error(`Failed to update marketplace "${MARKETPLACE_NAME}"`);
+    }
     return;
   }
   console.log(`Adding marketplace "${MARKETPLACE_NAME}" from ${source}...`);
@@ -80,12 +89,16 @@ const ensureMarketplaceAdded = (source: string): void => {
   }
 };
 
-const ensurePluginsInstalled = (): void => {
+const ensurePluginsLatest = (): void => {
   const installed = installedPluginIds();
   for (const plugin of PLUGINS) {
     const id = `${plugin}@${MARKETPLACE_NAME}`;
     if (installed.has(id)) {
-      console.log(`Plugin "${id}" already installed.`);
+      console.log(`Updating "${id}"...`);
+      const status = runInherited('claude', ['plugin', 'update', id, '--yes']);
+      if (status !== 0) {
+        throw new Error(`Failed to update ${id}`);
+      }
       continue;
     }
     console.log(`Installing "${id}"...`);
@@ -108,8 +121,8 @@ const main = (): void => {
 
   const source = resolveMarketplaceSource(argv);
 
-  ensureMarketplaceAdded(source);
-  ensurePluginsInstalled();
+  ensureMarketplaceLatest(source);
+  ensurePluginsLatest();
 
   console.log(`Handing off to claude with ${RECIPE_PROMPT}...`);
   const status = runInherited('claude', [RECIPE_PROMPT]);
