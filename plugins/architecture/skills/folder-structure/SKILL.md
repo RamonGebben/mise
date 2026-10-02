@@ -91,6 +91,89 @@ component a stable import root (`import { Button } from './Button'`, not
 `'./Button/Button'`) and a place to grow into - a sub-component or hook
 doesn't force a rename or a restructure, it just adds a folder.
 
+## Styled components are components
+
+Every styled-component definition is a component in its own right and gets
+its own folder - in the owning component's `components/` (recursively), or
+in an atomic tier when it's generic. A component's `index.tsx` holds its
+implementation, not the styling that makes it up: open the file and the
+first thing you read should be what it renders.
+
+**Why:** a file that opens with a dozen one-off `styled.div`s buries the
+actual implementation below them. Splitting them out keeps every file about
+one thing, and gives each styled piece the same folder shape, story and
+import root as any other component.
+
+- **The folder's `index.tsx` is the styled export itself** - no React
+  wrapper around it unless it actually needs props, logic or its own
+  children structure.
+- **It gets a story**, like every other component (see "Storybook stories"
+  below) - nested ones included.
+- **Generic → atomic tier, specific → `components/`.** A UI primitive that
+  isn't tied to its owner (a `Button` with variants, a `Code` chip, an
+  `InlineLink`) goes to `atoms/`/`molecules/`. Only pieces specific to their
+  owner (the owner's own `Title`, `Intro`, `Actions` layout) nest under its
+  `components/`. A group of them that forms a meaningful unit (e.g. an
+  `Intro` with its `Title` and `Lead`) becomes one sub-component with its
+  own `components/`, not a flat list of siblings.
+
+```tsx
+// bad - the template's implementation is buried below its styling
+// src/templates/Home/index.tsx
+const Page = styled.div`…`;
+const Main = styled.main`…`;
+const Title = styled.h1`…`;
+const Lead = styled.p`…`;
+const Button = styled.a<{ $variant: 'primary' | 'secondary' }>`…`;
+
+export const Home = () => {
+  return (
+    <Page>
+      <Main>…</Main>
+    </Page>
+  );
+};
+```
+
+```
+// good - every styled piece is its own component
+src/
+  atoms/
+    Button/            generic - variants, reused anywhere
+      index.tsx
+      index.stories.tsx
+  templates/
+    Home/
+      index.tsx        only the implementation
+      index.stories.tsx
+      components/
+        Page/          specific to Home
+        Main/
+        Intro/
+          index.tsx
+          index.stories.tsx
+          components/
+            Title/
+            Lead/
+```
+
+```tsx
+// src/templates/Home/components/Intro/components/Title/index.tsx
+import styled from 'styled-components';
+
+export const Title = styled.h1`
+  margin: 0;
+  font-size: ${({ theme }) => theme.fontSize('xl')};
+`;
+```
+
+**Fallback only:** if a styled definition genuinely can't be split out yet,
+it goes **below** the main component, never above it - and it's an open
+item to split, not an accepted end state. (Module-level `const`s used inside
+the component body are fine below it; only a styled definition that
+references another one at definition time - extending it, `styled(Other)`,
+or using it as a selector, `${Other}` - has to come after `Other`.)
+
 ## Component-specific hooks
 
 Live in that component's `hooks/<hookName>/index.ts` - a folder, never a

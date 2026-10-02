@@ -42,6 +42,18 @@ split) Next's App Router.
     missing, `components/` and `hooks/` for anything private to it), per
     [[folder-structure]]'s component folder shape.
   - **Import fixups.** Update every import referencing the old location.
+- **Styled-component definitions inside a component file** (including files
+  this setup itself writes while migrating, e.g. a Tailwind page rewritten
+  to styled-components) - every `styled.*`/`styled(...)` const in a
+  component's `index.tsx` other than its own export gets split into its own
+  folder, per [[folder-structure]]'s "Styled components are components":
+  generic primitives (a `Button` with variants, a `Code` chip, a link) go to
+  the matching atomic tier, owner-specific pieces nest under the owner's
+  `components/` - grouped into a sub-component with its own `components/`
+  where they form a unit, not a flat list. Each new folder's `index.tsx` is
+  the styled export itself, plus an `index.stories.tsx`. If one genuinely
+  can't be split, move it below the main component and list it in the plan
+  as still open.
 - A component-specific hook found outside a `hooks/<hookName>/index.ts`
   shape (a loose `useThing.ts`) gets the same folder migration, per
   [[folder-structure]]'s hook-extraction section - and flag (don't
@@ -66,18 +78,28 @@ split) Next's App Router.
   (`plugins/architecture/skills/design-system/templates/theme/index.ts`),
   `src/providers/ThemeProvider/index.tsx`, and
   `src/providers/StyledComponentsRegistry/index.tsx` ([[styling]]), wired at
-  the app root. Token values stay the template's placeholders - flag them as
-  needing real values, don't invent brand colors.
+  the app root. Scaffold it as the project's final theme, seeded from the
+  colors, fonts, sizes, spacing, shadows and breakpoints the project
+  already uses (see [[design-system]]'s "Seeded from what the project
+  already uses"), with the template's defaults only for tokens the project
+  has no value for. The plan lists which tokens came from where, so the dev
+  can check the mapping. No comment calling it a template or placeholder,
+  and nothing in the plan asking for the values to be replaced - changing
+  them is up to the dev. Don't invent brand colors.
 - **Not present, but the project already has a theme of some kind** (a
   Tailwind config, a plain styled-components `DefaultTheme`, CSS variables,
   etc.): don't silently replace it - present the existing theme's shape
   against `SystemTokens` and propose the migration as a plan (map the
-  existing values into the tokens object, using the project's real values
-  rather than the template's placeholders), applying only once approved. If
+  existing values into the scaffolded tokens object; a token the existing
+  theme has no value for is seeded from values used elsewhere in the
+  project, and only keeps the default when there are none), applying only once
+  approved. Same as above: no template/placeholder comment. If
   the existing approach isn't styled-components at all, ask before proposing
   a wholesale swap - that's a bigger call than this skill should make
   unprompted.
-- **Already present and wired correctly:** nothing to do.
+- **Already present and wired correctly:** nothing to do. A
+  template/placeholder comment left in `src/theme/index.ts` by an earlier
+  setup run is the one exception - propose removing it.
 - **Hardcoded style values.** While scanning components for the folder
   migration in step 1, also collect hardcoded colors/shadows/gradients/
   spacing found in `styled-components` template literals (violations of

@@ -29,10 +29,12 @@ export default '@pindakaasman/prettier-config';
 ```js
 import base from '@pindakaasman/prettier-config';
 
-export default {
+const config = {
   ...base,
   printWidth: 100,
 };
+
+export default config;
 ```
 
 ## What it sets

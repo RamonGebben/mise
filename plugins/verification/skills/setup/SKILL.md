@@ -83,14 +83,21 @@ example uses pnpm; swap `pnpm run` for the detected package manager's
 equivalent (`npm run`, `yarn`):
 
 ```js
-export default {
+const config = {
   '*': 'prettier --write --ignore-unknown',
-  '*.{js,jsx,ts,tsx,mjs,cjs}': 'eslint --fix',
+  '*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}': 'eslint --fix',
   // Functions, so lint-staged doesn't append the staged file names -
   // these check the whole project.
   '**': () => ['pnpm run typecheck', 'pnpm run test'],
 };
+
+export default config;
 ```
+
+The object is assigned to a variable before it's exported, not exported
+anonymously: `eslint-config-next` (pulled in by the `/next` config) warns on
+an anonymous default export (`import/no-anonymous-default-export`), and a
+fresh setup must lint clean.
 
 `.husky/pre-commit` (using the detected package manager):
 

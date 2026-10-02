@@ -10,6 +10,10 @@ value - always go through the theme, via the typed `DesignSystem` accessor
 methods documented in [[design-system]] (`theme.color()`, `theme.boxShadow()`,
 `theme.gradient()`, …), not a raw property path.
 
+Every styled-component definition is its own component with its own folder,
+never a pile of one-off `styled.*` consts at the top of another component's
+file - see "Styled components are components" in [[folder-structure]].
+
 ## Server/Client boundary
 
 styled-components needs a `'use client'` boundary - it cannot be used

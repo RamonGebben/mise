@@ -1,8 +1,5 @@
 import DesignSystem, { type SystemTokens } from '@pindakaasman/design-system';
 
-// --- Placeholder default theme - replace every value below with your real
-// design tokens. Structure is real, the numbers/colors are not. ---
-
 const tokens: SystemTokens = {
   breakpoints: {
     mobile: '375px',
