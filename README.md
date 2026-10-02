@@ -24,11 +24,11 @@ Coding conventions come in two kinds:
   can check these. Normally they live in a style guide that people forget to
   read.
 
-I write most of my code with [Claude Code](https://claude.com/claude-code),
-Anthropic's coding agent, which can read written guidance and follow it.
-That turns the second kind of rule into something that actually gets
-applied: I write it down once, with the reason behind it, and Claude uses it
-while it works in any of my projects.
+This project is built with [Claude Code](https://claude.com/claude-code) in
+mind. The judgment calls are written as instructions Claude can follow, so
+they get applied instead of forgotten: each rule is written down once, with
+the reason behind it, and Claude uses it while working in any project that
+has the plugins installed.
 
 So this repo holds both kinds, kept apart. Anything a tool can check goes
 into a shared config package. Everything else goes into a Claude Code
