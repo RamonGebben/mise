@@ -1,5 +1,12 @@
 # @pindakaasman/mise-place
 
+## 0.3.0
+
+### Minor Changes
+
+- 966e557: Default the marketplace source to the `RamonGebben/mise` GitHub repo instead of `~/Projects/mise`, so `npx @pindakaasman/mise-place` works on any machine. Pass `--marketplace` or set `MISE_MARKETPLACE` to use a local clone.
+- 7660574: Update the `mise` marketplace and every already-installed plugin on each run, instead of skipping them, so `npx @pindakaasman/mise-place` always starts `/init:setup` on the latest released plugin versions.
+
 ## 0.2.0
 
 ### Minor Changes
