@@ -9,7 +9,16 @@ Theming isn't a plain nested object accessed by property path
 (`theme.color.primary.base`), and it isn't hand-copied into every project
 either. It's an instance of the `DesignSystem` class from the published
 `@pindakaasman/design-system` package (source: `packages/design-system/` in
-this repo), constructed from a tokens object each project provides.
+the mise repo), constructed from a tokens object each project provides.
+
+**Where the exact API comes from:** when you need more than this skill
+documents (a method signature, a type's members), read the package the
+current project actually has installed -
+`node_modules/@pindakaasman/design-system/dist/*.d.ts` and its `README.md` -
+not the mise repo's `src/`. The installed `.d.ts` files always match the
+version the project resolves; a marketplace checkout of the repo can be
+ahead of or behind it. If the package isn't installed yet, this skill is
+the reference.
 
 **Why a published package instead of a copy-in template:** the class and its
 type contract (`SystemTokens`, the `SystemSize`/`SystemBreakpoint`/etc.

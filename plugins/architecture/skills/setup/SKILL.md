@@ -75,7 +75,8 @@ split) Next's App Router.
 - **Not present, and no existing theme of any kind:** propose installing
   both packages and scaffolding `src/theme/index.ts` from
   [[design-system]]'s template
-  (`plugins/architecture/skills/design-system/templates/theme/index.ts`),
+  (`templates/theme/index.ts` in that skill's own directory, i.e.
+  `${CLAUDE_PLUGIN_ROOT}/skills/design-system/templates/theme/index.ts`),
   `src/providers/ThemeProvider/index.tsx`, and
   `src/providers/StyledComponentsRegistry/index.tsx` ([[styling]]), wired at
   the app root. Scaffold it as the project's final theme, seeded from the
