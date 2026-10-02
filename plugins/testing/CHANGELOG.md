@@ -1,5 +1,15 @@
 # @pindakaasman/testing-plugin
 
+## 0.4.0
+
+### Minor Changes
+
+- 731d7b6: `testing:setup` no longer leaves `e2e/` empty: it adds one spec (the project's most central user task, or `e2e/app/open-the-app.spec.ts` on a blank starter) and a `webServer` in the Playwright config so the suite runs on its own.
+
+### Patch Changes
+
+- 3c9f63d: `testing:setup` names the Vitest config `vitest.config.mts` in CommonJS packages (no `"type": "module"`), and renames an existing `.ts` one, so Vite stops warning that the config is ESM loaded as CommonJS.
+
 ## 0.3.0
 
 ### Minor Changes
