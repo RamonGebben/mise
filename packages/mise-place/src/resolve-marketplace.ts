@@ -1,5 +1,4 @@
-import * as os from 'node:os';
-import * as path from 'node:path';
+const DEFAULT_SOURCE = 'RamonGebben/mise';
 
 export const resolveMarketplaceSource = (argv: Array<string>): string => {
   const flagIndex = argv.indexOf('--marketplace');
@@ -16,5 +15,5 @@ export const resolveMarketplaceSource = (argv: Array<string>): string => {
     return fromEnv;
   }
 
-  return path.join(os.homedir(), 'Projects', 'mise');
+  return DEFAULT_SOURCE;
 };
