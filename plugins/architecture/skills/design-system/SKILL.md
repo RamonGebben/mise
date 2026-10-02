@@ -64,9 +64,10 @@ const theme = new DesignSystem(tokens);
 export default theme;
 ```
 
-Full placeholder starting point: [templates/theme/index.ts](templates/theme/index.ts).
-Structure is real, the colors/numbers are not - replace them with your
-actual brand values.
+Default theme: [templates/theme/index.ts](templates/theme/index.ts). Once
+scaffolded it _is_ the project's theme - no comment marking it as a
+template or placeholder. The dev changes its values in place whenever they
+want to.
 
 **Rendering without a viewport.** `fontSize()`, `spacing()` and
 `spacingBetween()` resolve per breakpoint, which needs a viewport. During

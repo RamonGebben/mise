@@ -78,18 +78,23 @@ split) Next's App Router.
   (`plugins/architecture/skills/design-system/templates/theme/index.ts`),
   `src/providers/ThemeProvider/index.tsx`, and
   `src/providers/StyledComponentsRegistry/index.tsx` ([[styling]]), wired at
-  the app root. Token values stay the template's placeholders - flag them as
-  needing real values, don't invent brand colors.
+  the app root. Scaffold it as the project's final theme: the default
+  values as they are, with no comment calling it a template or placeholder,
+  and nothing in the plan asking for the values to be replaced - changing
+  them is up to the dev. Don't invent brand colors.
 - **Not present, but the project already has a theme of some kind** (a
   Tailwind config, a plain styled-components `DefaultTheme`, CSS variables,
   etc.): don't silently replace it - present the existing theme's shape
   against `SystemTokens` and propose the migration as a plan (map the
-  existing values into the tokens object, using the project's real values
-  rather than the template's placeholders), applying only once approved. If
+  existing values into the scaffolded tokens object, keeping the default for
+  any token the existing theme has no value for), applying only once
+  approved. Same as above: no template/placeholder comment. If
   the existing approach isn't styled-components at all, ask before proposing
   a wholesale swap - that's a bigger call than this skill should make
   unprompted.
-- **Already present and wired correctly:** nothing to do.
+- **Already present and wired correctly:** nothing to do. A
+  template/placeholder comment left in `src/theme/index.ts` by an earlier
+  setup run is the one exception - propose removing it.
 - **Hardcoded style values.** While scanning components for the folder
   migration in step 1, also collect hardcoded colors/shadows/gradients/
   spacing found in `styled-components` template literals (violations of
