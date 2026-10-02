@@ -10,9 +10,10 @@ import {
   type SystemGradient,
 } from './tokens.js';
 import { BaseColor, BaseColorVariant } from './colorPalette.js';
-import type { SystemTokens } from './system.js';
+import type { SystemModeTokens, SystemTokens } from './system.js';
 import { path } from 'ramda';
-import type { ColorString } from './types.js';
+import type { ColorString, CssVar } from './types.js';
+import { COLOR_MODE_ATTRIBUTE, type ColorMode } from './colorMode.js';
 
 /**
  * Whether there's a viewport to measure. False wherever there's no DOM -
@@ -21,6 +22,52 @@ import type { ColorString } from './types.js';
  */
 const canMatchMedia = (): boolean =>
   typeof window !== 'undefined' && typeof window.matchMedia === 'function';
+
+type CssVarName = `--${string}`;
+
+const kebab = (key: string): string =>
+  key.replace(/[A-Z]/g, char => `-${char.toLowerCase()}`);
+
+const colorVarName = (hue: BaseColor, variant: BaseColorVariant): CssVarName =>
+  `--ds-color-${kebab(hue)}-${kebab(variant)}`;
+
+const gradientVarName = (variant: SystemGradient): CssVarName =>
+  `--ds-gradient-${kebab(variant)}`;
+
+const boxShadowVarName = (variant: SystemBoxShadow): CssVarName =>
+  `--ds-shadow-${kebab(variant)}`;
+
+const cssVar = (name: CssVarName): CssVar => `var(${name})`;
+
+/** One `name: value;` declaration per color-bearing token of a mode. */
+const modeDeclarations = (mode: SystemModeTokens): Array<string> => [
+  ...Object.entries(mode.colorPalette).flatMap(([hue, variants]) =>
+    Object.entries(variants).map(
+      ([variant, value]) =>
+        `${colorVarName(hue as BaseColor, variant as BaseColorVariant)}: ${value};`,
+    ),
+  ),
+  ...Object.entries(mode.gradient).map(
+    ([variant, value]) =>
+      `${gradientVarName(variant as SystemGradient)}: ${value};`,
+  ),
+  ...Object.entries(mode.boxShadow).map(
+    ([variant, value]) =>
+      `${boxShadowVarName(variant as SystemBoxShadow)}: ${value};`,
+  ),
+];
+
+const ruleset = (
+  selector: string,
+  colorScheme: ColorMode,
+  mode: SystemModeTokens,
+): string =>
+  [
+    `${selector} {`,
+    `  color-scheme: ${colorScheme};`,
+    ...modeDeclarations(mode).map(declaration => `  ${declaration}`),
+    '}',
+  ].join('\n');
 
 export type DesignSystemOptions = {
   /**
@@ -150,29 +197,76 @@ export default class DesignSystem {
 
   /**
    * color()
-   * get a color from your color palette
+   * get a color from your color palette, as a CSS variable that follows the
+   * current color mode
    */
-  public color(
+  public color(hue: BaseColor, variant: BaseColorVariant = 'base'): CssVar {
+    return cssVar(colorVarName(hue, variant));
+  }
+
+  /**
+   * rawColor()
+   * get the literal value of a color in one mode - for JS color math, where
+   * a CSS variable can't be used. Falls back to light without dark tokens.
+   */
+  public rawColor(
     hue: BaseColor,
     variant: BaseColorVariant = 'base',
+    mode: ColorMode = 'light',
   ): ColorString {
-    return this.ds.colors.colorPalette[hue][variant];
+    return this.modeTokens(mode).colorPalette[hue][variant];
   }
 
   /**
    * gradient()
-   * get a gradient from your gradient palette
+   * get a gradient from your gradient palette, as a CSS variable that
+   * follows the current color mode
    */
-  public gradient(variant: SystemGradient = 'menu'): string {
-    return this.ds.colors.gradient[variant];
+  public gradient(variant: SystemGradient = 'menu'): CssVar {
+    return cssVar(gradientVarName(variant));
   }
 
   /**
    * boxShadow()
-   * get a box-shadow from your box-shadow palette
+   * get a box-shadow from your box-shadow palette, as a CSS variable that
+   * follows the current color mode
    */
-  public boxShadow(variant: SystemBoxShadow = 'base'): string {
-    return this.ds.boxShadow[variant];
+  public boxShadow(variant: SystemBoxShadow = 'base'): CssVar {
+    return cssVar(boxShadowVarName(variant));
+  }
+
+  /**
+   * hasDarkMode()
+   * whether the tokens define a dark mode
+   */
+  public hasDarkMode(): boolean {
+    return this.ds.modes.dark !== undefined;
+  }
+
+  /**
+   * colorModeCss()
+   * the global CSS defining every color variable the accessors return: light
+   * on :root, dark when the OS prefers it, and either one forced by
+   * `data-mode` on <html> (see setColorMode()). Light-only without dark
+   * tokens.
+   */
+  public colorModeCss(): string {
+    const { light, dark } = this.ds.modes;
+    const lightRules = ruleset(':root', 'light', light);
+
+    if (dark === undefined) return lightRules;
+
+    const attr = COLOR_MODE_ATTRIBUTE;
+    const systemDark = ruleset(`:root:not([${attr}='light'])`, 'dark', dark)
+      .split('\n')
+      .map(line => `  ${line}`)
+      .join('\n');
+
+    return [
+      lightRules,
+      `@media (prefers-color-scheme: dark) {\n${systemDark}\n}`,
+      ruleset(`:root[${attr}='dark']`, 'dark', dark),
+    ].join('\n');
   }
 
   /**
@@ -235,6 +329,10 @@ export default class DesignSystem {
    */
   public remToPxRaw(value: number | string): number {
     return parseFloat(this.remToPx(value));
+  }
+
+  private modeTokens(mode: ColorMode): SystemModeTokens {
+    return (mode === 'dark' && this.ds.modes.dark) || this.ds.modes.light;
   }
 
   public get(pathToProperty: string): unknown {

@@ -35,9 +35,23 @@ export type SystemColorPaletteColor = Record<BaseColorVariant, ColorString>;
 
 export type SystemColorPalette = Record<BaseColor, SystemColorPaletteColor>;
 
-export interface SystemColor {
+/**
+ * Every token that holds a color, and so changes between color modes.
+ * Everything else (type, spacing, breakpoints, …) is the same in every mode.
+ */
+export interface SystemModeTokens {
   colorPalette: SystemColorPalette;
   gradient: Record<SystemGradient, string>;
+  boxShadow: Record<SystemBoxShadow, string>;
+}
+
+/**
+ * `dark` is optional: a project without it is intentionally light-only and
+ * ignores the OS preference.
+ */
+export interface SystemModes {
+  light: SystemModeTokens;
+  dark?: SystemModeTokens;
 }
 
 export type SystemZIndexScale = Record<SystemZIndex, number>;
@@ -64,11 +78,10 @@ export interface SystemBorder {
 export interface System {
   type: SystemType;
   breakpoints: SystemBreakpoints;
-  colors: SystemColor;
+  modes: SystemModes;
   zIndex: SystemZIndexScale;
   spacing: SystemSpacing;
   border?: SystemBorder;
-  boxShadow: Record<SystemBoxShadow, string>;
 }
 
 /** SystemTokens is System, under the name DesignSystem's constructor expects. */

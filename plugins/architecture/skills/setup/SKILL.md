@@ -77,9 +77,10 @@ split) Next's App Router.
   [[design-system]]'s template
   (`templates/theme/index.ts` in that skill's own directory, i.e.
   `${CLAUDE_PLUGIN_ROOT}/skills/design-system/templates/theme/index.ts`),
-  `src/providers/ThemeProvider/index.tsx`, and
+  `src/providers/ThemeProvider/index.tsx` (with its `ColorModeStyle`),
   `src/providers/StyledComponentsRegistry/index.tsx` ([[styling]]), wired at
-  the app root. Scaffold it as the project's final theme, seeded from the
+  the app root, and - when the theme has `modes.dark` - `colorModeScript()`
+  in the root layout's `<head>` (see [[design-system]]'s "Color modes"). Scaffold it as the project's final theme, seeded from the
   colors, fonts, sizes, spacing, shadows and breakpoints the project
   already uses (see [[design-system]]'s "Seeded from what the project
   already uses"), with the template's defaults only for tokens the project
@@ -101,6 +102,28 @@ split) Next's App Router.
 - **Already present and wired correctly:** nothing to do. A
   template/placeholder comment left in `src/theme/index.ts` by an earlier
   setup run is the one exception - propose removing it.
+- **Color modes.** Audit an existing theme and its consumers against
+  [[design-system]]'s "Color modes":
+  - A tokens file in the pre-1.0 shape (`colors.colorPalette`,
+    `colors.gradient`, top-level `boxShadow`, a `darker` variant) → propose
+    bumping `@pindakaasman/design-system` to `^1` and migrating it: those
+    tokens move under `modes.light`, and `darker` becomes `emphasis` in the
+    tokens and in every `color(…, 'darker')` call.
+  - `ThemeProvider` not rendering `ColorModeStyle` → add it. Without it
+    every color accessor resolves to an undefined CSS variable.
+  - `modes.dark` present but no `colorModeScript()` in the root layout's
+    `<head>`, or no `suppressHydrationWarning` on `<html>` → add them.
+  - Mode-specific styling outside the theme (`prefers-color-scheme` media
+    queries, `.dark`/`[data-theme]` selectors, in styled-components literals
+    or global CSS) → move the values into `modes.dark` (seeding it per
+    "Seeded from what the project already uses" when it doesn't exist yet)
+    and replace them with accessor calls.
+  - JS color math on an accessor's result (`darken(theme.color(…))` and the
+    like) → propose a token for that shade; if none fits, `rawColor()` per
+    mode, listed as a case needing a human call.
+  - An existing mode switch of its own (a theme-swapping `ThemeProvider`,
+    `next-themes`, a custom context) → propose replacing it with
+    `setColorMode()`/`getColorMode()`. Ask before removing a library.
 - **Hardcoded style values.** While scanning components for the folder
   migration in step 1, also collect hardcoded colors/shadows/gradients/
   spacing found in `styled-components` template literals (violations of
