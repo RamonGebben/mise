@@ -21,3 +21,9 @@ export type SystemZIndex = 'base' | 'dropdown' | 'sticky' | 'modal' | 'toast';
 export type SystemBoxShadow = 'base' | 'card' | 'modal';
 
 export type SystemGradient = 'menu' | 'hero';
+
+export type SystemFontFamily = 'base' | 'heading' | 'mono';
+
+export type SystemBorderRadius = 's' | 'base' | 'full';
+
+export type SystemBorderWidth = 's' | 'base';

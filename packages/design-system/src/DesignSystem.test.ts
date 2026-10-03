@@ -11,7 +11,11 @@ const tokens: SystemTokens = {
   },
   type: {
     baseFontSize: '16px',
-    fontFamily: { base: 'Inter, sans-serif' },
+    fontFamily: {
+      base: 'Inter, sans-serif',
+      heading: 'Fraunces, serif',
+      mono: 'JetBrains Mono, monospace',
+    },
     fontWeight: { regular: 400, medium: 500, semibold: 600, bold: 700 },
     lineHeight: { tight: 1.1, base: 1.5, loose: 1.8 },
     sizes: {
@@ -120,6 +124,10 @@ const tokens: SystemTokens = {
     },
   },
   zIndex: { base: 0, dropdown: 10, sticky: 20, modal: 30, toast: 40 },
+  border: {
+    radius: { s: '4px', base: '8px', full: '9999px' },
+    width: { s: '1px', base: '2px' },
+  },
 };
 
 const dark: SystemModeTokens = {
@@ -458,10 +466,39 @@ describe('DesignSystem', () => {
     });
   });
 
-  describe('z', () => {
+  describe('zIndex / z', () => {
     it('returns the z-index value', () => {
-      expect(theme.z('base')).toBe(0);
-      expect(theme.z('toast')).toBe(40);
+      expect(theme.zIndex('base')).toBe(0);
+      expect(theme.zIndex('toast')).toBe(40);
+    });
+
+    it('z is an alias of zIndex', () => {
+      expect(theme.z('modal')).toBe(theme.zIndex('modal'));
+    });
+  });
+
+  describe('fontFamily / ff', () => {
+    it('returns the font-family value', () => {
+      expect(theme.fontFamily('base')).toBe('Inter, sans-serif');
+      expect(theme.fontFamily('mono')).toBe('JetBrains Mono, monospace');
+    });
+
+    it('ff is an alias of fontFamily', () => {
+      expect(theme.ff('heading')).toBe(theme.fontFamily('heading'));
+    });
+  });
+
+  describe('borderRadius', () => {
+    it('returns the border-radius value', () => {
+      expect(theme.borderRadius('s')).toBe('4px');
+      expect(theme.borderRadius('full')).toBe('9999px');
+    });
+  });
+
+  describe('borderWidth', () => {
+    it('returns the border-width value', () => {
+      expect(theme.borderWidth('s')).toBe('1px');
+      expect(theme.borderWidth('base')).toBe('2px');
     });
   });
 

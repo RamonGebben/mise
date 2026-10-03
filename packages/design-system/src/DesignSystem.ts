@@ -1,6 +1,9 @@
 import { generateMedia, MediaGenerator } from 'styled-media-query';
 import {
+  SystemBorderRadius,
+  SystemBorderWidth,
   SystemBreakpoint,
+  SystemFontFamily,
   SystemFontWeight,
   SystemLineHeight,
   SystemSize,
@@ -141,6 +144,21 @@ export default class DesignSystem {
   public fs(size: SystemSize): CssVar {
     return this.fontSize(size);
   }
+
+  /**
+   * fontFamily()
+   * get a font-family value from the design system object
+   */
+  public fontFamily(family: SystemFontFamily): string {
+    return this.ds.type.fontFamily[family];
+  }
+
+  /**
+   * ff()
+   * get a font-family value from the design system object
+   * @see fontFamily()
+   */
+  public ff = this.fontFamily;
 
   /**
    * fontWeight()
@@ -337,11 +355,34 @@ export default class DesignSystem {
   }
 
   /**
-   * z()
+   * zIndex()
    * get a z-index value from the design system object
    */
-  public z(z: SystemZIndex): number {
+  public zIndex(z: SystemZIndex): number {
     return this.ds.zIndex[z];
+  }
+
+  /**
+   * z()
+   * get a z-index value from the design system object
+   * @see zIndex()
+   */
+  public z = this.zIndex;
+
+  /**
+   * borderRadius()
+   * get a border-radius value from the design system object
+   */
+  public borderRadius(size: SystemBorderRadius): string {
+    return this.ds.border.radius[size];
+  }
+
+  /**
+   * borderWidth()
+   * get a border-width value from the design system object
+   */
+  public borderWidth(size: SystemBorderWidth): string {
+    return this.ds.border.width[size];
   }
 
   /**

@@ -21,11 +21,14 @@ export type {
   SystemBreakpoint,
   SystemBreakpointMap,
   SystemSize,
+  SystemFontFamily,
   SystemFontWeight,
   SystemLineHeight,
   SystemZIndex,
   SystemBoxShadow,
   SystemGradient,
+  SystemBorderRadius,
+  SystemBorderWidth,
 } from './tokens.js';
 
 export type { BaseColor, BaseColorVariant } from './colorPalette.js';

@@ -135,13 +135,15 @@ either. Use `rawColor(hue, variant, mode)` for the literal value of one mode.
 ## Accessing tokens
 
 Every token goes through a typed method - never a hard-coded value, and
-never a raw property-path string (`theme.get(...)` is an escape hatch for
-the rare case nothing else covers, not the default way in):
+never a raw property-path string or a dig through the raw tokens
+(`theme.get(...)` and `theme.getTokens()` are escape hatches for the rare
+case nothing else covers, not the default way in):
 
 ```ts
 const Card = styled.div`
   background: ${({ theme }) => theme.color('background')};
   box-shadow: ${({ theme }) => theme.boxShadow('card')};
+  border-radius: ${({ theme }) => theme.borderRadius('base')};
   padding: ${({ theme }) => theme.spacing('base')};
 
   ${({ theme }) => theme.mq.greaterThan('tabletLandscape')`
@@ -161,13 +163,16 @@ const Card = styled.div`
 | `colorModeCss()`                              | -                                                                                   | `string`           | Global CSS defining the color variables the accessors return, per mode.                                                                                                |
 | `hasDarkMode()`                               | -                                                                                   | `boolean`          | Whether the tokens define `modes.dark`.                                                                                                                                |
 | `fontSize(size)` / `fs(size)`                 | `size: SystemSize`                                                                  | `CssVar`           | Font size, following the current breakpoint.                                                                                                                           |
+| `fontFamily(family)` / `ff(family)`           | `family: SystemFontFamily`                                                          | `string`           | Font family.                                                                                                                                                           |
 | `fontWeight(weight)` / `fw(weight)`           | `weight: SystemFontWeight`                                                          | `number`           | Font weight.                                                                                                                                                           |
 | `lineHeight(selector)` / `lh(selector)`       | `selector: SystemLineHeight`                                                        | `number`           | Line height.                                                                                                                                                           |
 | `spacing(size)` / `space(size)`               | `size: SystemSize`                                                                  | `CssVar`           | Spacing value, following the current breakpoint.                                                                                                                       |
 | `spacingBetween(a, b)` / `spaceBetween(a, b)` | `a: SystemSize, b: SystemSize`                                                      | `string`           | Absolute spacing between two sizes, as a `calc(abs(...))` expression.                                                                                                  |
 | `breakpointCss()`                             | -                                                                                   | `string`           | Global CSS defining the `fontSize()`/`spacing()`/`spacingBetween()` variables, per breakpoint.                                                                         |
 | `bp(breakpoint)`                              | `breakpoint: SystemBreakpoint`                                                      | `string`           | Raw breakpoint value.                                                                                                                                                  |
-| `z(z)`                                        | `z: SystemZIndex`                                                                   | `number`           | Z-index value.                                                                                                                                                         |
+| `zIndex(z)` / `z(z)`                          | `z: SystemZIndex`                                                                   | `number`           | Z-index value.                                                                                                                                                         |
+| `borderRadius(size)`                          | `size: SystemBorderRadius`                                                          | `string`           | Border radius.                                                                                                                                                         |
+| `borderWidth(size)`                           | `size: SystemBorderWidth`                                                           | `string`           | Border width.                                                                                                                                                          |
 | `mq`                                          | -                                                                                   | `MediaGenerator`   | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.greaterThan('tabletLandscape')`...` `` (also `lessThan`, `between`).   |
 | `getCurrentBreakpoint()`                      | -                                                                                   | `SystemBreakpoint` | Closest matching breakpoint for the current viewport; the `ssrBreakpoint` option when there's no viewport (SSR, Node). Not reactive - see "Responsive values and SSR". |
 | `getTokens()`                                 | -                                                                                   | `SystemTokens`     | The raw tokens object passed to the constructor.                                                                                                                       |
@@ -177,7 +182,8 @@ const Card = styled.div`
 
 `SystemSize` is `'xxs' \| 'xs' \| 's' \| 'base' \| 'm' \| 'l' \| 'xl'`.
 `BaseColor`, `SystemBreakpoint`, `SystemZIndex`, `SystemBoxShadow`,
-`SystemGradient`, `SystemFontWeight` and `SystemLineHeight` are the other
+`SystemGradient`, `SystemFontFamily`, `SystemFontWeight`, `SystemLineHeight`,
+`SystemBorderRadius` and `SystemBorderWidth` are the other
 key-unions each accessor takes - all exported from the package, all part of
 the published contract (see [`src/tokens.ts`](src/tokens.ts) and
 [`src/colorPalette.ts`](src/colorPalette.ts) for the exact members).

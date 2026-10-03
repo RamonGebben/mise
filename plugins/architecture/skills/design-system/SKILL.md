@@ -43,7 +43,7 @@ packages/design-system/          published as @pindakaasman/design-system
   src/
     DesignSystem.ts               the class
     system.ts                     System/SystemTokens - the shape contract
-    tokens.ts                     SystemBreakpoint, SystemSize, SystemZIndex, SystemBoxShadow, SystemGradient, …
+    tokens.ts                     SystemBreakpoint, SystemSize, SystemZIndex, SystemFontFamily, SystemBorderRadius, …
     colorPalette.ts               BaseColor, BaseColorVariant
     colorMode.ts                  ColorMode, setColorMode/getColorMode, colorModeScript
     types.ts                      ColorString and friends
@@ -95,8 +95,10 @@ fits their own design.
 
 - Map a value to the token slot it actually plays (the color on primary
   buttons and links is `primary`, the page background is `background`, the
-  body font is `fontFamily.base`). When several near-identical values fill
-  one slot, take the most-used one.
+  body font is `fontFamily.base`, the headings' is `fontFamily.heading`
+  and code's is `fontFamily.mono`). When several near-identical values
+  fill one slot, take the most-used one. A project without a separate
+  heading font gets `heading` set to the same value as `base`.
 - Fill the size and spacing scales from the values in use, sorted onto the
   closest steps. A step with no matching value keeps the template's
   default, and so does any token the project has no value for.
@@ -308,14 +310,44 @@ following the mode.
 ## Accessing tokens
 
 Always through the typed methods - never a hard-coded value, and never a
-raw property-path string (`theme.get('modes.light.colorPalette.primary.base')` is an escape
-hatch for the rare case nothing else covers, not the default way in).
+raw property-path string (`theme.get('modes.light.colorPalette.primary.base')`)
+or a dig through the raw tokens (`theme.getTokens().border?.radius.base`).
+Both are escape hatches for the rare case nothing else covers, not the
+default way in. **Why:** a typed method fails at compile time when a token
+is renamed or removed; a path string or an optional chain just yields
+`undefined` in the CSS.
+
+Every token group has its accessor: `color()`, `gradient()`, `boxShadow()`,
+`fontSize()`, `fontFamily()`, `fontWeight()`, `lineHeight()`, `spacing()`,
+`borderRadius()`, `borderWidth()`, `zIndex()` and `bp()`. If you find
+yourself reaching for `getTokens()` for a value that isn't covered, that's a
+gap in the package - add the accessor there rather than working around it
+in the project.
+
+```ts
+// bad - untyped, and `?.` hides a missing token as `undefined`
+const Toast = styled.div`
+  font-family: ${({ theme }) => theme.getTokens().type.fontFamily.base};
+  border: ${({ theme }) => theme.getTokens().border?.width.s} solid;
+  z-index: ${({ theme }) => theme.getTokens().zIndex.toast};
+`;
+```
+
+```ts
+// good
+const Toast = styled.div`
+  font-family: ${({ theme }) => theme.fontFamily('base')};
+  border: ${({ theme }) => theme.borderWidth('s')} solid;
+  z-index: ${({ theme }) => theme.zIndex('toast')};
+`;
+```
 
 ```ts
 // bad - hard-coded, bypasses the design system entirely
 const Card = styled.div`
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
   padding: 16px;
 `;
 ```
@@ -325,6 +357,7 @@ const Card = styled.div`
 const Card = styled.div`
   background: ${({ theme }) => theme.color('background')};
   box-shadow: ${({ theme }) => theme.boxShadow('card')};
+  border-radius: ${({ theme }) => theme.borderRadius('base')};
   padding: ${({ theme }) => theme.spacing('base')};
 
   ${({ theme }) => theme.mq.greaterThan('tabletLandscape')`
@@ -355,6 +388,14 @@ every project needs to reconcile:
   the accessors now return CSS variables, and `breakpointCss()` defines them
   per breakpoint via real `@media` rules, so the browser resolves the value
   instead of a pre-hydration JS guess.
+
+- **`fontFamily` and `border` are typed like every other token.**
+  `fontFamily` used to accept any key and `border` was optional, so neither
+  could have a typed accessor - consumers fell back to
+  `getTokens().border?.radius.base`. Since 3.0, `fontFamily` is keyed by
+  `SystemFontFamily` (`base`, `heading`, `mono` - named for their role, not
+  the typeface category, like `emphasis` over `darker`) and `border` is
+  required.
 
 ## ramda
 
