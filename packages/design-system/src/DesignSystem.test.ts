@@ -198,8 +198,6 @@ describe('DesignSystem', () => {
     it('falls back to the last breakpoint by default when there is no window (SSR)', () => {
       vi.stubGlobal('window', undefined);
       expect(theme.getCurrentBreakpoint()).toBe('desktop');
-      expect(theme.fontSize('l')).toBe('2rem');
-      expect(theme.spacing('base')).toBe('2rem');
     });
 
     it('falls back to the last breakpoint when window has no matchMedia', () => {
@@ -213,7 +211,6 @@ describe('DesignSystem', () => {
         ssrBreakpoint: 'smallest',
       });
       expect(mobileFirst.getCurrentBreakpoint()).toBe('mobile');
-      expect(mobileFirst.fontSize('l')).toBe('1.25rem');
     });
 
     it('ignores ssrBreakpoint when there is a viewport', () => {
@@ -226,23 +223,16 @@ describe('DesignSystem', () => {
   });
 
   describe('fontSize / fs', () => {
-    it('returns the size for the current breakpoint in rem', () => {
-      setViewportWidth(320);
-      expect(theme.fontSize('l')).toBe('1.25rem');
+    it('returns a CSS variable, regardless of viewport', () => {
+      expect(theme.fontSize('l')).toBe('var(--ds-font-size-l)');
 
       setViewportWidth(1920);
-      expect(theme.fontSize('l')).toBe('2rem');
-    });
-
-    it('accepts sizes given as plain numbers', () => {
-      setViewportWidth(1920);
-      expect(theme.fontSize('xl')).toBe('2.5rem');
+      expect(theme.fontSize('l')).toBe('var(--ds-font-size-l)');
     });
 
     it('fs is an alias for fontSize', () => {
-      setViewportWidth(800);
       expect(theme.fs('m')).toBe(theme.fontSize('m'));
-      expect(theme.fs('m')).toBe('1.25rem');
+      expect(theme.fs('m')).toBe('var(--ds-font-size-m)');
     });
   });
 
@@ -269,47 +259,34 @@ describe('DesignSystem', () => {
   });
 
   describe('spacing / space', () => {
-    it('returns the spacing for the current breakpoint in rem', () => {
-      setViewportWidth(320);
-      expect(theme.spacing('base')).toBe('1rem');
+    it('returns a CSS variable, regardless of viewport', () => {
+      expect(theme.spacing('base')).toBe('var(--ds-spacing-base)');
 
       setViewportWidth(1920);
-      expect(theme.spacing('base')).toBe('2rem');
-    });
-
-    it('accepts sizes given as plain numbers', () => {
-      setViewportWidth(1920);
-      expect(theme.spacing('xl')).toBe('4rem');
-      expect(theme.spacingBetween('xl', 'base')).toBe('2rem');
+      expect(theme.spacing('base')).toBe('var(--ds-spacing-base)');
     });
 
     it('space is an alias for spacing', () => {
-      setViewportWidth(768);
       expect(theme.space('l')).toBe(theme.spacing('l'));
-      expect(theme.space('l')).toBe('2rem');
+      expect(theme.space('l')).toBe('var(--ds-spacing-l)');
     });
   });
 
   describe('spacingBetween / spaceBetween', () => {
-    it('returns the absolute difference between two sizes in rem', () => {
-      setViewportWidth(1920);
-      expect(theme.spacingBetween('base', 's')).toBe('1rem');
-      expect(theme.spacingBetween('s', 'base')).toBe('1rem');
+    it('returns a calc(abs()) expression over the spacing variables of both sizes', () => {
+      expect(theme.spacingBetween('base', 's')).toBe(
+        'calc(abs(var(--ds-spacing-base) - var(--ds-spacing-s)))',
+      );
     });
 
-    it('uses the scale of the current breakpoint', () => {
-      setViewportWidth(320);
-      expect(theme.spacingBetween('l', 'xs')).toBe('1.25rem');
-    });
-
-    it('returns 0rem for the same size', () => {
-      setViewportWidth(320);
-      expect(theme.spacingBetween('s', 's')).toBe('0rem');
+    it('is independent of argument order', () => {
+      expect(theme.spacingBetween('s', 'base')).toBe(
+        'calc(abs(var(--ds-spacing-s) - var(--ds-spacing-base)))',
+      );
     });
 
     it('spaceBetween is an alias for spacingBetween', () => {
-      setViewportWidth(1000);
-      expect(theme.spaceBetween('l', 's')).toBe('1.75rem');
+      expect(theme.spaceBetween('l', 's')).toBe(theme.spacingBetween('l', 's'));
     });
   });
 
@@ -432,6 +409,48 @@ describe('DesignSystem', () => {
     });
   });
 
+  describe('breakpointCss', () => {
+    // Collapse whitespace so assertions don't depend on indentation.
+    const css = () => theme.breakpointCss().replace(/\s+/g, ' ');
+
+    it('defines every fontSize/spacing variable on :root with the smallest breakpoint', () => {
+      const output = css();
+
+      expect(output).toMatch(/^:root \{/);
+      expect(output).toContain('--ds-font-size-l: 1.25rem;');
+      expect(output).toContain('--ds-spacing-base: 1rem;');
+    });
+
+    it('overrides every variable per wider breakpoint, at a min-width one past the previous max', () => {
+      const output = css();
+
+      expect(output).toContain(
+        '@media (min-width: 376px) { :root { --ds-font-size-xxs: 0.5625rem;',
+      );
+      expect(output).toContain('--ds-spacing-base: 1.25rem;');
+      expect(output).toContain('@media (min-width: 769px) { :root {');
+      expect(output).toContain('@media (min-width: 1025px) { :root {');
+    });
+
+    it('defines the same variables at every breakpoint', () => {
+      const names = (block: string) => block.match(/--ds-[\w-]+/g)?.sort();
+      const [smallest, ...overrides] = theme
+        .breakpointCss()
+        .split(/(?=@media)/);
+
+      for (const override of overrides) {
+        expect(names(override)).toEqual(names(smallest));
+      }
+    });
+
+    it('does not vary with the actual viewport - resolution happens in the browser, not here', () => {
+      const withoutViewport = theme.breakpointCss();
+
+      setViewportWidth(1920);
+      expect(theme.breakpointCss()).toBe(withoutViewport);
+    });
+  });
+
   describe('bp', () => {
     it('returns the breakpoint value', () => {
       expect(theme.bp('mobile')).toBe('375px');
@@ -455,11 +474,6 @@ describe('DesignSystem', () => {
     it('remToPxRaw returns only the number', () => {
       expect(theme.remToPxRaw(1.5)).toBe(24);
       expect(theme.remToPxRaw('0.5rem')).toBe(8);
-    });
-
-    it('round-trips with the rem values fontSize returns', () => {
-      setViewportWidth(320);
-      expect(theme.remToPx(theme.fontSize('l'))).toBe('20px');
     });
   });
 

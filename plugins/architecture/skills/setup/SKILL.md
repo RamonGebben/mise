@@ -77,7 +77,8 @@ split) Next's App Router.
   [[design-system]]'s template
   (`templates/theme/index.ts` in that skill's own directory, i.e.
   `${CLAUDE_PLUGIN_ROOT}/skills/design-system/templates/theme/index.ts`),
-  `src/providers/ThemeProvider/index.tsx` (with its `ColorModeStyle`),
+  `src/providers/ThemeProvider/index.tsx` (with its `ColorModeStyle` and
+  `BreakpointStyle`),
   `src/providers/StyledComponentsRegistry/index.tsx` ([[styling]]), wired at
   the app root, and - when the theme has `modes.dark` - `colorModeScript()`
   in the root layout's `<head>` (see [[design-system]]'s "Color modes"). Scaffold it as the project's final theme, seeded from the
@@ -129,6 +130,29 @@ split) Next's App Router.
   - An existing mode switch of its own (a theme-swapping `ThemeProvider`,
     `next-themes`, a custom context) → propose replacing it with
     `setColorMode()`/`getColorMode()`. Ask before removing a library.
+- **Responsive values.** Audit against [[design-system]]'s "Responsive
+  values resolve in CSS, not JS":
+  - `@pindakaasman/design-system` below the version where `fontSize()`,
+    `spacing()` and `spacingBetween()` return CSS variables → propose
+    bumping it and migrating: no tokens change shape, but any JS math on
+    these accessors' results (`parseFloat(theme.fontSize(…))`,
+    `remToPx(theme.spacing(…))`, a snapshot test asserting a literal rem
+    string) now gets `NaN` or a literal `var(--…)`/`calc(…)` string instead -
+    list every call site found as a case needing a human call, since fixing
+    each means seeing what the number was actually used for.
+  - `ThemeProvider` not rendering `BreakpointStyle` → add it. Without it
+    `fontSize()`, `spacing()` and `spacingBetween()` all resolve to an
+    undefined CSS variable.
+  - A consumer calling `getCurrentBreakpoint()` to pick JSX, inline styles,
+    or any other rendered output that must match between server and client
+    → flag it as a case needing a human call: that's the same JS-guess
+    hydration mismatch `breakpointCss()` exists to avoid, and
+    `getCurrentBreakpoint()` is explicitly not reactive, so there's no
+    drop-in fix to apply automatically.
+  - Breakpoint-conditional styling outside the theme (manual
+    `window.matchMedia()` calls, a custom `useBreakpoint` hook duplicating
+    `getCurrentBreakpoint()`) driving CSS output → propose replacing it with
+    `fontSize()`/`spacing()`/`mq`.
 - **Hardcoded style values.** While scanning components for the folder
   migration in step 1, also collect hardcoded colors/shadows/gradients/
   spacing found in `styled-components` template literals (violations of

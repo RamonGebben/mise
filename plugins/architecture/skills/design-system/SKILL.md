@@ -112,11 +112,25 @@ dark)` blocks, a `.dark` class, Tailwind `dark:` variants) seed
 - Seeding the theme from these values is what makes the later swap of
   hardcoded values for accessor calls a clean, one-to-one mapping.
 
-**Rendering without a viewport.** `fontSize()`, `spacing()` and
-`spacingBetween()` resolve per breakpoint, which needs a viewport. During
-SSR there isn't one, so they fall back to the largest breakpoint. A
-mobile-first app can switch that to the smallest by passing an option -
-leave the default unless the project asks for it:
+**Responsive values resolve in CSS, not JS.** `fontSize()`, `spacing()` and
+`spacingBetween()` return CSS variables (`var(--ds-font-size-l)`), the same
+way `color()` does for color modes - see "Color modes" below for why: a
+value picked by a JS guess during SSR, then measured for real on the client's
+first render, is exactly the shape of bug that causes a hydration mismatch
+whenever the guess is wrong. `breakpointCss()` defines those variables per
+breakpoint via real `@media (min-width: …)` rules, so the browser resolves
+the current value directly - nothing for a guess to disagree with. Wire it
+the same way as `colorModeCss()`, in its own global style (see "Wiring"
+below).
+
+`getCurrentBreakpoint()` is unrelated to those three accessors now - it's a
+one-off synchronous read of the real viewport, or the `ssrBreakpoint` option
+where there's none (server rendering, plain Node). Only use it for a plain JS
+value (not DOM/CSS output that must match between server and client); it
+isn't reactive, so using it to drive rendered output reintroduces the
+hydration mismatch the CSS-variable accessors don't have. A mobile-first app
+can switch its fallback to the smallest breakpoint - leave the default
+unless the project asks for it:
 
 ```ts
 const theme = new DesignSystem(tokens, { ssrBreakpoint: 'smallest' });
@@ -137,11 +151,13 @@ const theme = new DesignSystem(tokens, { ssrBreakpoint: 'smallest' });
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import theme from '~/theme';
 import { ColorModeStyle } from './components/ColorModeStyle';
+import { BreakpointStyle } from './components/BreakpointStyle';
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <StyledThemeProvider theme={() => theme}>
       <ColorModeStyle />
+      <BreakpointStyle />
       {children}
     </StyledThemeProvider>
   );
@@ -149,7 +165,20 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 ```
 
 `ColorModeStyle` defines the CSS variables the color accessors return - see
-"Color modes" below.
+"Color modes" below. `BreakpointStyle` defines the ones `fontSize()`,
+`spacing()` and `spacingBetween()` return - see "Responsive values resolve in
+CSS, not JS" above.
+
+```tsx
+// src/providers/ThemeProvider/components/BreakpointStyle/index.tsx
+'use client';
+
+import { createGlobalStyle } from 'styled-components';
+
+export const BreakpointStyle = createGlobalStyle`
+  ${({ theme }) => theme.breakpointCss()}
+`;
+```
 
 `theme={() => theme}` (a function, not the instance directly) rather than
 `theme={theme}`: styled-components accepts either a theme object or a
@@ -318,6 +347,14 @@ every project needs to reconcile:
   being declared on the tokens type. They're now declared explicitly, on
   `SystemModeTokens` in `system.ts`, next to `colorPalette` - shadows and
   gradients hold colors, so they change per mode too.
+- **`fontSize()`/`spacing()`/`spacingBetween()` used to resolve from
+  `window.matchMedia()` directly inside the accessor**, falling back to
+  `ssrBreakpoint` without a viewport. That guess disagreeing with the
+  client's real viewport on first render is a hydration mismatch - the same
+  failure mode color modes had before `colorModeCss()`. Fixed the same way:
+  the accessors now return CSS variables, and `breakpointCss()` defines them
+  per breakpoint via real `@media` rules, so the browser resolves the value
+  instead of a pre-hydration JS guess.
 
 ## ramda
 
