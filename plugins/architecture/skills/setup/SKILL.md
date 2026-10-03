@@ -103,6 +103,22 @@ split) Next's App Router.
 - **Already present and wired correctly:** nothing to do. A
   template/placeholder comment left in `src/theme/index.ts` by an earlier
   setup run is the one exception - propose removing it.
+- **Typed font families and borders.** `@pindakaasman/design-system`
+  below `^3` → propose bumping it and migrating the tokens file:
+  `type.fontFamily` gets exactly `base`, `heading` and `mono` (map
+  existing keys by role - e.g. `sans` → `base` - and seed missing ones
+  from fonts the project loads, `heading` falling back to `base`'s
+  value), and `border` becomes required (seed `radius`/`width` from values
+  in use, template defaults otherwise). Rename every
+  `getTokens()`/`get()` read of a renamed font key in the same change.
+- **Escape-hatch reads.** Audit consumers against [[design-system]]'s
+  "Accessing tokens": a `theme.getTokens()…` or `theme.get('…')` read that
+  a typed accessor covers (`getTokens().border?.width.s`,
+  `getTokens().type.fontFamily.base`, `getTokens().zIndex.toast`, …) →
+  propose the accessor call (`borderWidth('s')`, `fontFamily('base')`,
+  `zIndex('toast')`). One that no accessor covers → list it as a case
+  needing a human call, since it may point at a missing accessor in the
+  package.
 - **Color modes.** Audit an existing theme and its consumers against
   [[design-system]]'s "Color modes":
   - A tokens file in the pre-1.0 shape (`colors.colorPalette`,

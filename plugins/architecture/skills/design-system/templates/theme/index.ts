@@ -11,6 +11,8 @@ const tokens: SystemTokens = {
     baseFontSize: '16px',
     fontFamily: {
       base: 'system-ui, sans-serif',
+      heading: 'system-ui, sans-serif',
+      mono: 'ui-monospace, monospace',
     },
     fontWeight: {
       regular: 400,

@@ -7,8 +7,11 @@
 // runtime.
 
 import type {
+  SystemBorderRadius,
+  SystemBorderWidth,
   SystemBoxShadow,
   SystemBreakpoint,
+  SystemFontFamily,
   SystemFontWeight,
   SystemGradient,
   SystemLineHeight,
@@ -23,7 +26,7 @@ export type SystemFontSizes = Record<SystemSize, string | number>;
 
 export interface SystemType {
   baseFontSize: string | number;
-  fontFamily: { [key: string]: string };
+  fontFamily: Record<SystemFontFamily, string>;
   fontWeight: Record<SystemFontWeight, number>;
   sizes: Record<SystemBreakpoint, SystemFontSizes>;
   lineHeight: Record<SystemLineHeight, number>;
@@ -64,15 +67,8 @@ export interface SystemSpacing {
 }
 
 export interface SystemBorder {
-  radius: {
-    s: string;
-    base: string;
-    full: string;
-  };
-  width: {
-    s: string;
-    base: string;
-  };
+  radius: Record<SystemBorderRadius, string>;
+  width: Record<SystemBorderWidth, string>;
 }
 
 export interface System {
@@ -81,7 +77,7 @@ export interface System {
   modes: SystemModes;
   zIndex: SystemZIndexScale;
   spacing: SystemSpacing;
-  border?: SystemBorder;
+  border: SystemBorder;
 }
 
 /** SystemTokens is System, under the name DesignSystem's constructor expects. */
