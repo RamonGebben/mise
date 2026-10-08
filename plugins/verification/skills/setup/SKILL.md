@@ -130,16 +130,13 @@ An existing hook setup (a different `.husky/pre-commit`, `simple-git-hooks`,
 `lefthook`, a raw `.git/hooks/pre-commit`) goes in the plan as a migration
 to this one, never silently replaced.
 
-## 5. CI
+CI is not set up here: the `ci` plugin's setup owns the pipeline, and runs
+these same scripts in it.
 
-If the project has a CI workflow, check it runs `typecheck` alongside
-`lint`, `format` and `test`, and propose adding the step if it's missing.
-Don't create a CI workflow from scratch here.
-
-## 6. Plan and apply
+## 5. Plan and apply
 
 Present the plan (installs, scripts added or changed, `.prettierignore`
-edits, hook files, CI step, the separate formatting commit) and apply only
+edits, hook files, the separate formatting commit) and apply only
 after approval. Then run `format`, `lint`, `typecheck` and `test` once
 (the hook itself does nothing with no files staged) so any existing
 failures surface now; report them per [[conventions]]'s "pre-existing

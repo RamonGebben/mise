@@ -65,6 +65,7 @@ meaning:
 | `react`        | Component patterns                                                               |
 | `testing`      | Test harness, test structure and what to test                                    |
 | `verification` | The pre-commit gate, what to run while developing, what to do when a check fails |
+| `ci`           | The CI/CD pipeline, whatever the provider: stages, order, what runs in parallel  |
 | `init`         | Runs every other plugin's setup in one go (see below)                            |
 
 Each skill states a rule, says why, and gives a good and a bad example
@@ -109,7 +110,8 @@ npx @pindakaasman/mise-place
         ├─ /architecture:setup   │  each one inspects the project and
         ├─ /react:setup          │  returns a plan, nothing is changed yet
         ├─ /testing:setup        │
-        └─ /verification:setup   ┘
+        ├─ /verification:setup   │
+        └─ /ci:setup             ┘
         │
         ├─ show one combined plan  →  you approve or adjust it
         ├─ apply it
@@ -133,8 +135,8 @@ Each setup skill follows two rules:
   latest conventions all go through the same skill.
 
 `init:setup` has no setup knowledge of its own. It runs the other setups in
-a fixed order (TypeScript first, verification last, because verification
-wires up the tools the others installed) and combines their plans. When it
+a fixed order (TypeScript first; verification after the plugins whose tools
+it wires up; ci last, because its pipeline runs verification's scripts) and combines their plans. When it
 reaches a choice it can't make for you, like whether to move a Tailwind
 project to the design system, it asks.
 
@@ -245,7 +247,7 @@ its own conventions: the root ESLint and Prettier configs extend the
 packages in `configs/`, and the pre-commit hook is the same one the
 `verification` plugin installs in other projects. The hook formats and lints
 staged files, validates the plugins, and runs the typecheck and full test
-suite. CI runs the same checks on every push and pull request.
+suite. CI runs the same checks on every push.
 
 ## Releasing
 

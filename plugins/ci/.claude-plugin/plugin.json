@@ -1,0 +1,6 @@
+{
+  "name": "ci",
+  "version": "0.0.0",
+  "description": "How a CI/CD pipeline is shaped, whatever the provider: stages, their order, what depends on what and what runs in parallel",
+  "author": { "name": "Ramon Gebben" }
+}
