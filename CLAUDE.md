@@ -47,7 +47,7 @@ The `init` plugin gets added once there are two or more concern plugins to combi
 
 ```
 .claude-plugin/marketplace.json    marketplace catalog, one entry per plugin
-.github/workflows/ci.yml           lint/format/typecheck/build/test/validate on every push and PR
+.github/workflows/ci.yml           install -> verification -> build on every push (see the ci plugin)
 .github/workflows/release.yml      changesets version/publish on push to main
 .husky/pre-commit                  pre-commit gate (see Checks)
 eslint.config.mjs                  this repo linted by its own @pindakaasman/eslint-config
@@ -81,12 +81,15 @@ pre-commit hook (`.husky/pre-commit`, `lint-staged.config.js`) formats and
 lints staged files, validates plugins when plugin/marketplace files are
 staged, then runs `pnpm typecheck` and the full `pnpm test` - all against
 the staged snapshot only (`--hide-all`). Never bypass it.
-`.github/workflows/ci.yml` runs the same checks on every push and PR:
+`.github/workflows/ci.yml` runs the same checks on every push, shaped by
+the `ci` plugin's own conventions - three jobs, each waiting for the one
+before it:
 
-- `pnpm lint` / `pnpm format` - this repo's own code against its own configs.
-- `pnpm typecheck` / `pnpm build` / `pnpm test` - type-checks, compiles and
-  tests every package.
-- `pnpm validate-plugins` (`claude plugin validate .`).
+- **install** - installs the dependencies and caches them for the next jobs.
+- **verification** - `pnpm format`, `pnpm lint`, `pnpm typecheck`,
+  `pnpm test` and `pnpm validate-plugins` (`claude plugin validate .`), each
+  its own step in one job.
+- **build** - `pnpm build`, compiling every package.
 
 Test locally from another project: `claude plugin marketplace add
 <path-to-this-repo>`, then `claude plugin install <plugin>@mise`.

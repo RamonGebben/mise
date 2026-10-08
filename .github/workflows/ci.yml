@@ -1,9 +1,10 @@
 name: CI
 
+# Push is the only trigger for this repo's own branches. pull_request is
+# there for forks only: a fork's push never runs here, so its pull request
+# would otherwise get no pipeline at all (see the `if` on the install job).
 on:
   push:
-    branches:
-      - main
   pull_request:
 
 concurrency:
@@ -12,10 +13,12 @@ concurrency:
 
 env:
   HUSKY: 0
+  NODE_VERSION: 22
 
 jobs:
-  ci:
-    name: Lint, format, typecheck, build, test
+  install:
+    name: Install
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -27,23 +30,54 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: pnpm
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache dependencies
+        id: dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: dependencies-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install dependencies
+        if: steps.dependencies.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
+
+  verification:
+    name: Verification
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore dependencies
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: dependencies-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('pnpm-lock.yaml') }}
+          fail-on-cache-miss: true
+
+      - name: Format
+        run: pnpm run format
 
       - name: Lint
         run: pnpm run lint
 
-      - name: Format check
-        run: pnpm run format
-
       - name: Typecheck
         run: pnpm run typecheck
-
-      - name: Build
-        run: pnpm run build
 
       - name: Test
         run: pnpm run test
@@ -51,5 +85,33 @@ jobs:
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Validate plugin marketplace
+      - name: Validate plugins
         run: pnpm run validate-plugins
+
+  build:
+    name: Build
+    needs: verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore dependencies
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: dependencies-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('pnpm-lock.yaml') }}
+          fail-on-cache-miss: true
+
+      - name: Build
+        run: pnpm run build

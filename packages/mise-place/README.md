@@ -15,7 +15,7 @@ npx @pindakaasman/mise-place
 2. **Adds the `mise` marketplace**, from the resolved source (see Options
    below), or updates it from its source if it's already added.
 3. **Installs every mise plugin** (`typescript`, `architecture`, `react`,
-   `testing`, `verification`, `init`) at user scope, or updates any that
+   `testing`, `verification`, `ci`, `init`) at user scope, or updates any that
    are already installed - so every run picks up the latest released
    versions.
 4. **Hands off** into an interactive `claude` session in the current

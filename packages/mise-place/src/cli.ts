@@ -10,6 +10,7 @@ const PLUGINS = [
   'react',
   'testing',
   'verification',
+  'ci',
   'init',
 ];
 const RECIPE_PROMPT = '/init:setup';
