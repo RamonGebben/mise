@@ -1,6 +1,6 @@
 # @pindakaasman/tsconfig
 
-Ramon's shared TypeScript configs. Targets TypeScript v5+.
+Ramon's shared TypeScript configs. Targets TypeScript v5, v6 and v7.
 
 Four files, meant to be extended, not used directly:
 
