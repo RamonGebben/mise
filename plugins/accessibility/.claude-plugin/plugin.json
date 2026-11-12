@@ -1,0 +1,6 @@
+{
+  "name": "accessibility",
+  "version": "0.0.0",
+  "description": "WCAG 2.2 AA baked in: target sizes, focus, contrast, reflow and keyboard - and the lint, Storybook and CI checks that enforce it",
+  "author": { "name": "Ramon Gebben" }
+}

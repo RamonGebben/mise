@@ -8,7 +8,9 @@ export type BaseColor =
   | 'primary'
   | 'secondary'
   | 'tertiary'
-  | 'quaternary';
+  | 'quaternary'
+  // The keyboard focus indicator - `base` is the ring itself.
+  | 'focus';
 
 // `emphasis` is the stronger shade of a color (hover, pressed, borders). It's
 // named for its role rather than a direction: in a dark palette it's usually

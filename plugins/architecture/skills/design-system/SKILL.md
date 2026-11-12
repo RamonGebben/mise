@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: The published @pindakaasman/design-system package - a typed, breakpoint-aware accessor over theme tokens with light/dark color modes - and how it's scaffolded and provided as the styled-components theme
+description: The published @pindakaasman/design-system package - a typed accessor over theme tokens with one modular scale scaled by the root font size, light/dark color modes and a WCAG token audit - and how it's scaffolded and provided as the styled-components theme
 ---
 
 # Design system
@@ -21,20 +21,23 @@ ahead of or behind it. If the package isn't installed yet, this skill is
 the reference.
 
 **Why a published package instead of a copy-in template:** the class and its
-type contract (`SystemTokens`, the `SystemSize`/`SystemBreakpoint`/etc.
+type contract (`SystemTokens`, the `SystemFontSize`/`SystemBreakpoint`/etc.
 key-unions) are the same across every project - improving `DesignSystem` or
 adding a new accessor method should mean bumping a dependency version, not
 re-copying a file into each project and reconciling drift. Only the
 project-specific piece - actual token _values_ - gets scaffolded in.
 
-**Why a class instead of a flat object**, unchanged from the original
-reasoning: `fontSize()` and `spacing()` resolve differently depending on the
-current viewport (via `getCurrentBreakpoint()`), which a plain object can't
-express. A class also gives every token a typed accessor (`color(hue,
+**Why a class instead of a flat object:** some tokens are derived rather
+than stored - every font size and spacing step is computed from one ratio,
+and `rootCss()`/`colorModeCss()` turn the tokens into the global CSS the
+accessors rely on - which a plain object can't express. A class also gives
+every token a typed accessor (`color(hue,
 variant)`, `boxShadow(variant)`, …) instead of an arbitrary string path that
 only fails at runtime when it's wrong, and bundles the matching `mq` media
-query generator (from `styled-media-query`) off the same breakpoints so
-queries and token resolution never drift apart.
+query generator off the same breakpoints so queries and token resolution
+never drift apart. `mq.greaterThan(bp)` starts exactly where `bp`'s root
+font size does, and `mq.lessThan(bp)` stops just before it (range syntax,
+`width < …`), so no width matches both.
 
 ## What's published vs. what's scaffolded
 
@@ -43,7 +46,9 @@ packages/design-system/          published as @pindakaasman/design-system
   src/
     DesignSystem.ts               the class
     system.ts                     System/SystemTokens - the shape contract
-    tokens.ts                     SystemBreakpoint, SystemSize, SystemZIndex, SystemFontFamily, SystemBorderRadius, …
+    tokens.ts                     SystemBreakpoint, SystemFontSize, SystemSpacing, SystemZIndex, SystemFontFamily, …
+    scale.ts                      the modular scale: steps, ratio^step, the floor
+    audit.ts                      auditTokens/contrastRatio - WCAG AA checks on the tokens
     colorPalette.ts               BaseColor, BaseColorVariant
     colorMode.ts                  ColorMode, setColorMode/getColorMode, colorModeScript
     types.ts                      ColorString and friends
@@ -62,7 +67,7 @@ import DesignSystem, { type SystemTokens } from '@pindakaasman/design-system';
 
 const tokens: SystemTokens = {
   breakpoints: {
-    mobile: '375px',
+    mobile: '0px',
     tablet: '768px',
     tabletLandscape: '1024px',
     desktop: '1440px',
@@ -99,9 +104,14 @@ fits their own design.
   and code's is `fontFamily.mono`). When several near-identical values
   fill one slot, take the most-used one. A project without a separate
   heading font gets `heading` set to the same value as `base`.
-- Fill the size and spacing scales from the values in use, sorted onto the
-  closest steps. A step with no matching value keeps the template's
-  default, and so does any token the project has no value for.
+- Derive the scale from the sizes in use rather than copying them: the
+  body text size per breakpoint gives `type.base` (as a percentage of
+  16px), and the ratio between the heading sizes and the body size gives
+  `type.ratio`. Spacing isn't seeded at all - it follows the same ratio.
+  The plan shows the resulting px per step next to the values the project
+  had, so the dev sees what moves. Without type sizes to derive from, the
+  template's ratio and bases apply, and so does the template's value for
+  any other token the project has none for.
 - Only use values that are really in the project - don't invent brand
   colors or a font the project doesn't load.
 - Dark styles the project already has (`@media (prefers-color-scheme:
@@ -114,35 +124,123 @@ dark)` blocks, a `.dark` class, Tailwind `dark:` variants) seed
 - Seeding the theme from these values is what makes the later swap of
   hardcoded values for accessor calls a clean, one-to-one mapping.
 
-**Responsive values resolve in CSS, not JS.** `fontSize()`, `spacing()` and
-`spacingBetween()` return CSS variables (`var(--ds-font-size-l)`), the same
-way `color()` does for color modes - see "Color modes" below for why: a
-value picked by a JS guess during SSR, then measured for real on the client's
-first render, is exactly the shape of bug that causes a hydration mismatch
-whenever the guess is wrong. `breakpointCss()` defines those variables per
-breakpoint via real `@media (min-width: …)` rules, so the browser resolves
-the current value directly - nothing for a guess to disagree with. Wire it
-the same way as `colorModeCss()`, in its own global style (see "Wiring"
-below).
+## One scale, one root
 
-`getCurrentBreakpoint()` is unrelated to those three accessors now - it's a
-one-off synchronous read of the real viewport, or the `ssrBreakpoint` option
-where there's none (server rendering, plain Node). Only use it for a plain JS
-value (not DOM/CSS output that must match between server and client); it
-isn't reactive, so using it to drive rendered output reintroduces the
-hydration mismatch the CSS-variable accessors don't have. A mobile-first app
-can switch its fallback to the smallest breakpoint - leave the default
-unless the project asks for it:
+Font sizes and spacing are steps of **one modular scale**, the same at every
+breakpoint: `base` is `1rem`, each step up multiplies by `type.ratio`, each
+step down divides by it. Responsiveness comes from **the root font size
+alone** - `type.base` sets it per breakpoint, and every rem value grows or
+shrinks with it. **Why:** a relation is defined once instead of a table of
+numbers per breakpoint, so proportions between elements can't drift apart
+from one breakpoint to the next, and a layout with good reflow gets most of
+its responsiveness for free.
+
+- **Spacing follows the type**, on the same ratio - as in print, where
+  margins and leading derive from the type size. **Why:** a second scaling
+  method would be one more thing to reason about and adopt. There's no
+  spacing table to tune.
+- **The ratio is the token author's call** - 1.333 (a perfect fourth) in the
+  template. Only `type.base` changes per breakpoint, never the ratio. It
+  must be above 1 - at or below it the scale doesn't grow, and the audit
+  flags it.
+- **`type.base` is a percentage, never px.** **Why:** `font-size: 12px` on
+  the root overrides the user's own browser text size (WCAG 1.4.4); `75%`
+  scales with it.
+- **The smallest screen is the reference.** Its base stays at `100%`, and
+  wider ones grow from there (`100% → 100% → 106.25% → 112.5%` in the
+  template). **Why:** phones are held closer than laptops, so body text
+  shouldn't shrink there - and iOS Safari zooms in on focusing any input
+  under 16px.
+- **`type.floor` keeps text legible** (`0.75rem` in the template): no font
+  size resolves below it. Spacing has no floor, which is why
+  `SystemSpacing` has `xxs` and `xs` below `s` and `SystemFontSize`
+  doesn't - the floor would merge them into `s`.
+- **Breakpoints are the width each one starts at**, and the smallest is
+  `'0px'`.
+
+```ts
+// bad - a size per breakpoint, so the relations live nowhere
+type: {
+  sizes: {
+    mobile: { base: '16px', l: '22px' },
+    desktop: { base: '18px', l: '32px' },
+  },
+}
+```
+
+```ts
+// good - one relation, a root per breakpoint
+type: {
+  ratio: 1.333,
+  floor: 0.75,
+  base: { mobile: '100%', tablet: '100%', tabletLandscape: '106.25%', desktop: '112.5%' },
+}
+```
+
+**The trade-off:** everything scales by the same factor, so a heading can't
+shrink more than body text does on a small screen. When one component
+genuinely needs a different step at some breakpoint, pick it with `mq` -
+that's the escape hatch, not a second scale:
+
+```ts
+const Title = styled.h1`
+  font-size: ${({ theme }) => theme.fontSize('l')};
+
+  ${({ theme }) => theme.mq.greaterThan('desktop')`
+    font-size: ${theme.fontSize('xl')};
+  `}
+`;
+```
+
+**It all resolves in CSS, not JS.** `fontSize()`, `spacing()`,
+`spacingBetween()` and `minTarget()` return CSS variables
+(`var(--ds-font-size-l)`), the same way `color()` does for color modes - see
+"Color modes" below for why: a value picked by a JS guess during SSR, then
+measured for real on the client's first render, is exactly the shape of bug
+that causes a hydration mismatch whenever the guess is wrong. `rootCss()`
+sets the root font size per breakpoint via real `@media (min-width: …)`
+rules and defines the variables as constant rem values, so the browser
+resolves everything itself. Wire it the same way as `colorModeCss()`, in its
+own global style (see "Providing the theme" below). Never set a root or
+`html` font size anywhere else - `rootCss()` owns it.
+
+`getCurrentBreakpoint()` is a one-off synchronous read of the real viewport,
+or the `ssrBreakpoint` option where there's none (server rendering, plain
+Node). Only use it for a plain JS value (not DOM/CSS output that must match
+between server and client); it isn't reactive, so using it to drive rendered
+output reintroduces the hydration mismatch the CSS-variable accessors don't
+have. A mobile-first app can switch its fallback to the smallest breakpoint -
+leave the default unless the project asks for it:
 
 ```ts
 const theme = new DesignSystem(tokens, { ssrBreakpoint: 'smallest' });
 ```
 
-> **Roadmap note:** when the published package's `SystemTokens` shape
-> changes across a version bump, each project's scaffolded tokens file needs
-> a matching migration. The plan is to have setup/migration tooling do this
-> with AI assistance rather than by hand - not built yet, just the intended
-> direction.
+## Accessibility in the tokens
+
+The design system bakes in the WCAG AA rules tokens can decide; everything
+that needs judgment per component - and the lint, Storybook and CI setup
+that checks it - lives in the `accessibility` plugin.
+
+- **Target size.** `minTarget()` is 24px (WCAG 2.5.8, AA) for a mouse or
+  trackpad and 44px (2.5.5, AAA) wherever a touch input is present. It's
+  px, not rem, because a finger doesn't shrink with the type - and it's a
+  floor, never a fixed size: `min-block-size: max(${theme.minTarget()},
+…)`.
+- **Focus.** `focus` is a palette color, so the focus ring follows color
+  modes and gets contrast-checked like everything else. The template sets
+  it to `primary.emphasis`.
+- **Contrast.** `auditTokens(tokens)` checks every color's `text` on its
+  `base` and `emphasis` against 4.5:1, and every non-surface color's `base`
+  on the page `background` against 3:1, in every mode - plus the scale
+  rules above. It runs as a test in CI, not at runtime: a failing token
+  should block a merge, not crash a page.
+
+> **Roadmap:**
+>
+> - **Motion tokens** - durations and easings, with `prefers-reduced-motion`
+>   built into their accessor. Not built yet; until then motion stays in
+>   components, under the `accessibility` plugin's reduced-motion rule.
 
 ## Providing the theme
 
@@ -153,13 +251,13 @@ const theme = new DesignSystem(tokens, { ssrBreakpoint: 'smallest' });
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import theme from '~/theme';
 import { ColorModeStyle } from './components/ColorModeStyle';
-import { BreakpointStyle } from './components/BreakpointStyle';
+import { RootStyle } from './components/RootStyle';
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <StyledThemeProvider theme={() => theme}>
       <ColorModeStyle />
-      <BreakpointStyle />
+      <RootStyle />
       {children}
     </StyledThemeProvider>
   );
@@ -167,18 +265,18 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 ```
 
 `ColorModeStyle` defines the CSS variables the color accessors return - see
-"Color modes" below. `BreakpointStyle` defines the ones `fontSize()`,
-`spacing()` and `spacingBetween()` return - see "Responsive values resolve in
-CSS, not JS" above.
+"Color modes" below. `RootStyle` sets the root font size and defines the
+ones `fontSize()`, `spacing()`, `spacingBetween()` and `minTarget()` return -
+see "One scale, one root" above.
 
 ```tsx
-// src/providers/ThemeProvider/components/BreakpointStyle/index.tsx
+// src/providers/ThemeProvider/components/RootStyle/index.tsx
 'use client';
 
 import { createGlobalStyle } from 'styled-components';
 
-export const BreakpointStyle = createGlobalStyle`
-  ${({ theme }) => theme.breakpointCss()}
+export const RootStyle = createGlobalStyle`
+  ${({ theme }) => theme.rootCss()}
 `;
 ```
 
@@ -319,7 +417,7 @@ is renamed or removed; a path string or an optional chain just yields
 
 Every token group has its accessor: `color()`, `gradient()`, `boxShadow()`,
 `fontSize()`, `fontFamily()`, `fontWeight()`, `lineHeight()`, `spacing()`,
-`borderRadius()`, `borderWidth()`, `zIndex()` and `bp()`. If you find
+`minTarget()`, `borderRadius()`, `borderWidth()`, `zIndex()` and `bp()`. If you find
 yourself reaching for `getTokens()` for a value that isn't covered, that's a
 gap in the package - add the accessor there rather than working around it
 in the project.
@@ -385,9 +483,9 @@ every project needs to reconcile:
   `ssrBreakpoint` without a viewport. That guess disagreeing with the
   client's real viewport on first render is a hydration mismatch - the same
   failure mode color modes had before `colorModeCss()`. Fixed the same way:
-  the accessors now return CSS variables, and `breakpointCss()` defines them
-  per breakpoint via real `@media` rules, so the browser resolves the value
-  instead of a pre-hydration JS guess.
+  the accessors now return CSS variables, defined via real `@media` rules
+  (`rootCss()` since 4.0), so the browser resolves the value instead of a
+  pre-hydration JS guess.
 
 - **`fontFamily` and `border` are typed like every other token.**
   `fontFamily` used to accept any key and `border` was optional, so neither
@@ -396,6 +494,16 @@ every project needs to reconcile:
   `SystemFontFamily` (`base`, `heading`, `mono` - named for their role, not
   the typeface category, like `emphasis` over `darker`) and `border` is
   required.
+
+- **One scale instead of a table per breakpoint (4.0).** `type.sizes`,
+  `type.baseFontSize` and `spacing` used to hold px values per breakpoint,
+  converted to rem against a fixed base and swapped per breakpoint by
+  `breakpointCss()` - so rem was only a unit, and nothing kept proportions
+  between breakpoints. Since 4.0 every size is `ratio^step` rem off one
+  `type.ratio`, `type.base` sets the root per breakpoint, `rootCss()`
+  replaces `breakpointCss()`, `SystemSize` splits into `SystemFontSize`
+  (`s`…`xl`) and `SystemSpacing` (`xxs`…`xl`), breakpoints are start
+  widths, and `focus` joins the palette.
 
 ## ramda
 

@@ -78,7 +78,7 @@ split) Next's App Router.
   (`templates/theme/index.ts` in that skill's own directory, i.e.
   `${CLAUDE_PLUGIN_ROOT}/skills/design-system/templates/theme/index.ts`),
   `src/providers/ThemeProvider/index.tsx` (with its `ColorModeStyle` and
-  `BreakpointStyle`),
+  `RootStyle`),
   `src/providers/StyledComponentsRegistry/index.tsx` ([[styling]]), wired at
   the app root, and - when the theme has `modes.dark` - `colorModeScript()`
   in the root layout's `<head>` (see [[design-system]]'s "Color modes"). Scaffold it as the project's final theme, seeded from the
@@ -111,6 +111,43 @@ split) Next's App Router.
   value), and `border` becomes required (seed `radius`/`width` from values
   in use, template defaults otherwise). Rename every
   `getTokens()`/`get()` read of a renamed font key in the same change.
+- **One scale, one root.** `@pindakaasman/design-system` below `^4` →
+  propose bumping it and migrating the tokens file to [[design-system]]'s
+  "One scale, one root":
+  - **Derive, don't reset.** `type.base` per breakpoint is that
+    breakpoint's old `type.sizes[…].base` as a percentage of 16px (an old
+    `baseFontSize` other than 16px scales it the same way). `type.ratio`
+    is the best fit of the old `m`/`l`/`xl` sizes over the body size,
+    across breakpoints, rounded to three decimals. `type.floor` is
+    `0.75`. `type.sizes`, `type.baseFontSize` and `spacing` are removed -
+    spacing follows the ratio now.
+  - **Show what moves.** List the old and new px of every font-size and
+    spacing step at every breakpoint side by side. A step that moves by
+    more than 2px, or a smallest-breakpoint base under `100%`, is a case
+    needing a human call - offer the template's ratio and bases as the
+    alternative.
+  - **Breakpoints become start widths.** The smallest becomes `'0px'`;
+    the others keep their values, which now mark where each starts.
+  - **Removed steps.** Every `fontSize('xxs')`/`fontSize('xs')` call →
+    `fontSize('s')`. `spacing('xxs')`/`spacing('xs')` stay valid.
+  - **`focus`** joins the palette in every mode: seed it from the
+    project's existing focus styles (`:focus-visible`/`:focus` outline
+    colors), falling back to that mode's `primary.emphasis`.
+  - **Wiring.** `BreakpointStyle` → `RootStyle`, calling `rootCss()`
+    instead of `breakpointCss()`. A root font size set anywhere else
+    (`html`/`:root` `font-size` in global CSS or a global style) is
+    removed - `rootCss()` owns it. If it was there to scale the UI, fold
+    it into `type.base` instead.
+  - **`styled-components` below `^6`** → propose bumping it; `^4` needs
+    it as a peer.
+  - **`mq.lessThan()` call sites** - it now stops just before the
+    breakpoint's start width instead of including it. Nothing to change
+    unless a style relied on matching that exact width; list any
+    `lessThan`/`greaterThan` pair on the same breakpoint written to
+    paper over the old 1px overlap, so the workaround can go.
+  - **`remToPx()`/`remToPxRaw()` call sites** - list each as a case
+    needing a human call: they now convert at a breakpoint's root (the
+    smallest by default), so check which breakpoint the number was for.
 - **Escape-hatch reads.** Audit consumers against [[design-system]]'s
   "Accessing tokens": a `theme.getTokens()…` or `theme.get('…')` read that
   a typed accessor covers (`getTokens().border?.width.s`,
@@ -146,8 +183,8 @@ split) Next's App Router.
   - An existing mode switch of its own (a theme-swapping `ThemeProvider`,
     `next-themes`, a custom context) → propose replacing it with
     `setColorMode()`/`getColorMode()`. Ask before removing a library.
-- **Responsive values.** Audit against [[design-system]]'s "Responsive
-  values resolve in CSS, not JS":
+- **Responsive values.** Audit against [[design-system]]'s "One scale, one
+  root":
   - `@pindakaasman/design-system` below the version where `fontSize()`,
     `spacing()` and `spacingBetween()` return CSS variables → propose
     bumping it and migrating: no tokens change shape, but any JS math on
@@ -156,13 +193,17 @@ split) Next's App Router.
     string) now gets `NaN` or a literal `var(--…)`/`calc(…)` string instead -
     list every call site found as a case needing a human call, since fixing
     each means seeing what the number was actually used for.
-  - `ThemeProvider` not rendering `BreakpointStyle` → add it. Without it
-    `fontSize()`, `spacing()` and `spacingBetween()` all resolve to an
-    undefined CSS variable.
+  - `ThemeProvider` not rendering `RootStyle` → add it. Without it
+    `fontSize()`, `spacing()`, `spacingBetween()` and `minTarget()` all
+    resolve to an undefined CSS variable, and the root never scales.
+  - A component switching font-size or spacing steps per breakpoint with
+    `mq` everywhere, to emulate the old per-breakpoint tables → propose
+    dropping the overrides the root scaling now covers; keep only the ones
+    where the component genuinely needs a different step.
   - A consumer calling `getCurrentBreakpoint()` to pick JSX, inline styles,
     or any other rendered output that must match between server and client
     → flag it as a case needing a human call: that's the same JS-guess
-    hydration mismatch `breakpointCss()` exists to avoid, and
+    hydration mismatch `rootCss()` exists to avoid, and
     `getCurrentBreakpoint()` is explicitly not reactive, so there's no
     drop-in fix to apply automatically.
   - Breakpoint-conditional styling outside the theme (manual

@@ -1,26 +1,33 @@
 export { default } from './DesignSystem.js';
 export type { DesignSystemOptions } from './DesignSystem.js';
 
+export {
+  auditTokens,
+  contrastRatio,
+  MIN_TEXT_CONTRAST,
+  MIN_UI_CONTRAST,
+} from './audit.js';
+export type { AuditFinding, AuditRule } from './audit.js';
+
 export type {
   System,
   SystemTokens,
-  SystemFontSizes,
   SystemType,
+  RootFontSize,
   SystemBreakpoints,
   SystemColorPaletteColor,
   SystemColorPalette,
   SystemModeTokens,
   SystemModes,
   SystemZIndexScale,
-  SystemScale,
-  SystemSpacing,
   SystemBorder,
 } from './system.js';
 
 export type {
   SystemBreakpoint,
   SystemBreakpointMap,
-  SystemSize,
+  SystemFontSize,
+  SystemSpacing,
   SystemFontFamily,
   SystemFontWeight,
   SystemLineHeight,
@@ -34,6 +41,8 @@ export type {
 export type { BaseColor, BaseColorVariant } from './colorPalette.js';
 
 export type { ColorString, CssVar } from './types.js';
+
+export type { MediaGenerator, MediaTemplate } from './media.js';
 
 export {
   COLOR_MODE_META,
