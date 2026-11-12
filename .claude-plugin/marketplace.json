@@ -1,8 +1,16 @@
 {
   "name": "mise",
   "description": "My personal coding conventions, packaged for Claude Code",
-  "owner": { "name": "Ramon Gebben", "url": "https://github.com/RamonGebben" },
+  "owner": {
+    "name": "Ramon Gebben",
+    "url": "https://github.com/RamonGebben"
+  },
   "plugins": [
+    {
+      "name": "accessibility",
+      "source": "./plugins/accessibility",
+      "description": "WCAG 2.2 AA baked in: target sizes, focus, contrast, reflow and keyboard - and the lint, Storybook and CI checks that enforce it"
+    },
     {
       "name": "architecture",
       "source": "./plugins/architecture",

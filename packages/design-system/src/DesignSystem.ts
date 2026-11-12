@@ -5,8 +5,9 @@ import {
   SystemBreakpoint,
   SystemFontFamily,
   SystemFontWeight,
+  SystemFontSize,
   SystemLineHeight,
-  SystemSize,
+  SystemSpacing,
   SystemZIndex,
   SystemBreakpointMap,
   SystemBoxShadow,
@@ -17,6 +18,22 @@ import type { SystemModeTokens, SystemTokens } from './system.js';
 import { path } from 'ramda';
 import type { ColorString, CssVar } from './types.js';
 import { COLOR_MODE_META, type ColorMode } from './colorMode.js';
+import {
+  FONT_SIZE_STEPS,
+  fontSizeRem,
+  rootFontSizePx,
+  sortedBreakpoints,
+  SPACING_STEPS,
+  spacingRem,
+} from './scale.js';
+
+/**
+ * The minimum interactive target size: WCAG 2.5.8 (AA) for fine pointers, and
+ * 2.5.5 (AAA) wherever a touch input is present. In px, never rem - a finger
+ * doesn't get smaller with the type.
+ */
+const MIN_TARGET_FINE = '24px';
+const MIN_TARGET_COARSE = '44px';
 
 /**
  * Whether there's a viewport to measure. False wherever there's no DOM -
@@ -40,10 +57,13 @@ const gradientVarName = (variant: SystemGradient): CssVarName =>
 const boxShadowVarName = (variant: SystemBoxShadow): CssVarName =>
   `--ds-shadow-${kebab(variant)}`;
 
-const fontSizeVarName = (size: SystemSize): CssVarName =>
+const fontSizeVarName = (size: SystemFontSize): CssVarName =>
   `--ds-font-size-${size}`;
 
-const spacingVarName = (size: SystemSize): CssVarName => `--ds-spacing-${size}`;
+const spacingVarName = (size: SystemSpacing): CssVarName =>
+  `--ds-spacing-${size}`;
+
+const MIN_TARGET_VAR: CssVarName = '--ds-target-min';
 
 const cssVar = (name: CssVarName): CssVar => `var(${name})`;
 
@@ -57,14 +77,6 @@ const mediaBlock = (condition: string, inner: string): string =>
     .split('\n')
     .map(line => `  ${line}`)
     .join('\n')}\n}`;
-
-/** The smallest value past a CSS length, in its own unit (`'375px'` -> `'376px'`, `'48em'` -> `'48.01em'`). */
-const onePast = (length: string): string => {
-  const [, number, unit] = /^(-?[\d.]+)([a-z%]*)$/i.exec(length) ?? [];
-  const step = unit === 'px' || unit === '' ? 1 : 0.01;
-
-  return `${parseFloat(number) + step}${unit}`;
-};
 
 /** One `name: value;` declaration per color-bearing token of a mode. */
 const modeDeclarations = (mode: SystemModeTokens): Array<string> => [
@@ -95,10 +107,10 @@ export type DesignSystemOptions = {
   /**
    * Which breakpoint `getCurrentBreakpoint()` resolves to when there's no
    * viewport to measure (e.g. during SSR). Mobile-first apps usually want
-   * `'smallest'`. Doesn't affect `fontSize()`, `spacing()` or
-   * `spacingBetween()` - those resolve in CSS (see `breakpointCss()`), not
-   * from this guess, so they can't disagree with the browser's real
-   * viewport and never cause a hydration mismatch.
+   * `'smallest'`. Doesn't affect `fontSize()` or `spacing()` - those scale
+   * in CSS with the root font size (see `rootCss()`), not from this guess,
+   * so they can't disagree with the browser's real viewport and never cause
+   * a hydration mismatch.
    */
   ssrBreakpoint?: 'smallest' | 'largest';
 };
@@ -129,10 +141,10 @@ export default class DesignSystem {
 
   /**
    * fontSize()
-   * get a font-size value from the design system object, as a CSS variable
-   * that follows the current breakpoint - see `breakpointCss()`
+   * get a step of the type scale, as a CSS variable in rem - so it follows
+   * the root font size `rootCss()` sets per breakpoint
    */
-  public fontSize(size: SystemSize): CssVar {
+  public fontSize(size: SystemFontSize): CssVar {
     return cssVar(fontSizeVarName(size));
   }
 
@@ -141,7 +153,7 @@ export default class DesignSystem {
    * get a font-size value from the design system object
    * @see fontSize()
    */
-  public fs(size: SystemSize): CssVar {
+  public fs(size: SystemFontSize): CssVar {
     return this.fontSize(size);
   }
 
@@ -192,10 +204,10 @@ export default class DesignSystem {
 
   /**
    * spacing()
-   * get a spacing value from the design system object, as a CSS variable
-   * that follows the current breakpoint - see `breakpointCss()`
+   * get a step of the spacing scale - the same ratio as type, so whitespace
+   * keeps its relation to the text - as a CSS variable in rem
    */
-  public spacing(val: SystemSize): CssVar {
+  public spacing(val: SystemSpacing): CssVar {
     return cssVar(spacingVarName(val));
   }
 
@@ -204,30 +216,31 @@ export default class DesignSystem {
    * get a spacing value from the design system object
    * @see spacing()
    */
-  public space(val: SystemSize): CssVar {
+  public space(val: SystemSpacing): CssVar {
     return this.spacing(val);
   }
 
   /**
    * spacingBetween()
    *
-   * get the absolute spacing between two SystemSizes, as a CSS `calc()`
-   * expression over the same variables `spacing()` returns - so it follows
-   * the current breakpoint the same way. Requires the CSS `abs()` math
-   * function - supported in all major browsers, but only since Safari 18.2
-   * (Dec 2024), so this breaks visually (not a hard error) on older Safari.
+   * get the absolute difference between two spacing steps, as a CSS `calc()`
+   * expression over the same variables `spacing()` returns - the larger step
+   * first, so it's never negative
    */
-  public spacingBetween(a: SystemSize, b: SystemSize): string {
-    return `calc(abs(${this.spacing(a)} - ${this.spacing(b)}))`;
+  public spacingBetween(a: SystemSpacing, b: SystemSpacing): string {
+    const [larger, smaller] =
+      SPACING_STEPS[a] >= SPACING_STEPS[b] ? [a, b] : [b, a];
+
+    return `calc(${this.spacing(larger)} - ${this.spacing(smaller)})`;
   }
 
   /**
    * spaceBetween()
    *
-   * get the absolute spacing between two SystemFontSizes
+   * get the absolute difference between two spacing steps
    * @see spacingBetween()
    */
-  public spaceBetween(a: SystemSize, b: SystemSize): string {
+  public spaceBetween(a: SystemSpacing, b: SystemSpacing): string {
     return this.spacingBetween(a, b);
   }
 
@@ -304,44 +317,60 @@ export default class DesignSystem {
   }
 
   /**
-   * breakpointCss()
-   * the global CSS defining every variable `fontSize()`/`spacing()`/
-   * `spacingBetween()` return: the smallest breakpoint's values on `:root`,
-   * overridden by each wider breakpoint's own `@media (min-width: …)` rule.
-   * The browser resolves the current value directly, structurally the same
-   * on the server and the client's first render (both just reference the
-   * variable) - so there's nothing for a breakpoint guess to disagree with,
-   * and no hydration mismatch.
+   * minTarget()
+   * the minimum size of an interactive target, as a CSS variable: 24px
+   * (WCAG 2.5.8, AA) for a mouse or trackpad, 44px (2.5.5, AAA) wherever a
+   * touch input is present. Use it as a floor, never a fixed size:
+   * `min-block-size: max(${minTarget()}, …)`
    */
-  public breakpointCss(): string {
-    const { breakpoints } = this.ds;
-    const sorted = (Object.keys(breakpoints) as Array<SystemBreakpoint>).sort(
-      (a, b) => parseFloat(breakpoints[a]) - parseFloat(breakpoints[b]),
-    );
-    const [smallest, ...rest] = sorted;
-
-    const base = block(':root', this.sizeDeclarations(smallest));
-
-    const overrides = rest.map((breakpoint, index) => {
-      const minWidth = onePast(breakpoints[sorted[index]]);
-      const nested = block(':root', this.sizeDeclarations(breakpoint));
-
-      return mediaBlock(`(min-width: ${minWidth})`, nested);
-    });
-
-    return [base, ...overrides].join('\n');
+  public minTarget(): CssVar {
+    return cssVar(MIN_TARGET_VAR);
   }
 
-  /** One `name: value;` declaration per font-size and spacing token of a breakpoint. */
-  private sizeDeclarations(breakpoint: SystemBreakpoint): Array<string> {
+  /**
+   * rootCss()
+   * the global CSS behind `fontSize()`, `spacing()`, `spacingBetween()` and
+   * `minTarget()`. The root font size is set per breakpoint, as a percentage
+   * of the user's own setting; every font-size and spacing variable is a
+   * constant rem value that scales with it. The browser resolves the current
+   * breakpoint itself, structurally the same on the server and the client's
+   * first render - so there's nothing for a guess to disagree with, and no
+   * hydration mismatch.
+   */
+  public rootCss(): string {
+    const [smallest, ...rest] = sortedBreakpoints(this.ds);
+    const rootSize = (breakpoint: SystemBreakpoint) =>
+      block(':root', [`font-size: ${this.ds.type.base[breakpoint]};`]);
+
+    const variables = block(':root', [
+      ...this.scaleDeclarations(),
+      `${MIN_TARGET_VAR}: ${MIN_TARGET_FINE};`,
+    ]);
+
     return [
-      ...Object.entries(this.ds.type.sizes[breakpoint]).map(
-        ([size, value]) =>
-          `${fontSizeVarName(size as SystemSize)}: ${this.pxToRem(parseFloat(`${value}`))};`,
+      rootSize(smallest),
+      ...rest.map(breakpoint =>
+        mediaBlock(
+          `(min-width: ${this.ds.breakpoints[breakpoint]})`,
+          rootSize(breakpoint),
+        ),
       ),
-      ...Object.entries(this.ds.spacing.scale[breakpoint]).map(
-        ([size, value]) =>
-          `${spacingVarName(size as SystemSize)}: ${this.pxToRem(parseFloat(`${value}`))};`,
+      variables,
+      mediaBlock(
+        '(any-pointer: coarse)',
+        block(':root', [`${MIN_TARGET_VAR}: ${MIN_TARGET_COARSE};`]),
+      ),
+    ].join('\n');
+  }
+
+  /** One `name: value;` declaration per font-size and spacing step. */
+  private scaleDeclarations(): Array<string> {
+    return [
+      ...(Object.keys(FONT_SIZE_STEPS) as Array<SystemFontSize>).map(
+        size => `${fontSizeVarName(size)}: ${fontSizeRem(this.ds, size)}rem;`,
+      ),
+      ...(Object.keys(SPACING_STEPS) as Array<SystemSpacing>).map(
+        size => `${spacingVarName(size)}: ${spacingRem(this.ds, size)}rem;`,
       ),
     ];
   }
@@ -387,55 +416,57 @@ export default class DesignSystem {
 
   /**
    * getCurrentBreakpoint()
-   * returns the closest matching breakpoint based on viewport size, or the
-   * `ssrBreakpoint` option when there is no viewport to measure (e.g. during
-   * SSR). A one-off synchronous read, not reactive: it doesn't update on
-   * resize, and calling it during render produces a different result on the
-   * server than on the client's first render whenever the real viewport
-   * doesn't match `ssrBreakpoint` - rendering DOM from it (as opposed to
-   * CSS) can cause a hydration mismatch. `fontSize()`, `spacing()` and
-   * `spacingBetween()` no longer use it for exactly that reason - they
-   * resolve in CSS instead, via `breakpointCss()`.
+   * returns the widest breakpoint whose start width the viewport has
+   * reached, or the `ssrBreakpoint` option when there is no viewport to
+   * measure (e.g. during SSR). A one-off synchronous read, not reactive: it
+   * doesn't update on resize, and calling it during render produces a
+   * different result on the server than on the client's first render
+   * whenever the real viewport doesn't match `ssrBreakpoint` - rendering DOM
+   * from it (as opposed to CSS) can cause a hydration mismatch.
    */
   public getCurrentBreakpoint(): SystemBreakpoint {
-    const breakpoints = this.ds.breakpoints;
-    const keys = Object.keys(breakpoints) as Array<SystemBreakpoint>;
-    const largest = keys[keys.length - 1];
+    const sorted = sortedBreakpoints(this.ds);
+    const [smallest] = sorted;
+    const largest = sorted[sorted.length - 1];
 
     if (!canMatchMedia()) {
-      return this.ssrBreakpoint === 'smallest' ? keys[0] : largest;
+      return this.ssrBreakpoint === 'smallest' ? smallest : largest;
     }
 
-    const currentBp = keys.filter(
-      key => window.matchMedia(`(max-width: ${breakpoints[key]})`).matches,
+    const reached = sorted.filter(
+      key =>
+        window.matchMedia(`(min-width: ${this.ds.breakpoints[key]})`).matches,
     );
 
-    return currentBp[0] || largest;
+    return reached[reached.length - 1] ?? smallest;
   }
 
   /**
-   * By default we assume all values to come in pixels
-   *
-   * @param value
+   * Convert rem to px, including the unit `px`, at a breakpoint's root font
+   * size (the smallest breakpoint by default). Assumes the browser's default
+   * 16px - the user's own setting can't be known ahead of time.
    */
-  private pxToRem(value: number) {
-    const baseFontSize = parseFloat(`${this.ds.type.baseFontSize}`);
-    return `${parseFloat(`${value}`) / baseFontSize}rem`;
-  }
+  public remToPx(
+    value: number | string,
+    breakpoint?: SystemBreakpoint,
+  ): string {
+    const rootPx = rootFontSizePx(
+      this.ds,
+      breakpoint ?? sortedBreakpoints(this.ds)[0],
+    );
 
-  /**
-   * Convert rem to px, including the unit `px`
-   */
-  public remToPx(value: number | string): string {
-    const baseFontSize = parseFloat(`${this.ds.type.baseFontSize}`);
-    return `${parseFloat(`${value}`) * baseFontSize}px`;
+    return `${parseFloat(`${value}`) * rootPx}px`;
   }
 
   /**
    * Convert rem to px, returning only the number part
+   * @see remToPx()
    */
-  public remToPxRaw(value: number | string): number {
-    return parseFloat(this.remToPx(value));
+  public remToPxRaw(
+    value: number | string,
+    breakpoint?: SystemBreakpoint,
+  ): number {
+    return parseFloat(this.remToPx(value, breakpoint));
   }
 
   private modeTokens(mode: ColorMode): SystemModeTokens {

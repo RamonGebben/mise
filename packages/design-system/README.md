@@ -5,7 +5,7 @@ accessor over theme tokens, published so it can be versioned and upgraded
 across projects without copy-pasting.
 
 This package ships the **class and the shape** (`SystemTokens` and the
-`SystemSize`/`SystemBreakpoint`/etc. key-unions) - not concrete token
+`SystemFontSize`/`SystemBreakpoint`/etc. key-unions) - not concrete token
 _values_. Every project provides its own colors, breakpoints, and spacing
 scale, scaffolded in and satisfying `SystemTokens`. See the `architecture`
 plugin's `design-system` skill for that scaffolding and full usage docs
@@ -25,10 +25,21 @@ import DesignSystem, { type SystemTokens } from '@pindakaasman/design-system';
 
 const tokens: SystemTokens = {
   breakpoints: {
-    mobile: '375px',
+    mobile: '0px',
     tablet: '768px',
     tabletLandscape: '1024px',
     desktop: '1440px',
+  },
+  type: {
+    ratio: 1.333,
+    floor: 0.75,
+    base: {
+      mobile: '100%',
+      tablet: '100%',
+      tabletLandscape: '106.25%',
+      desktop: '112.5%',
+    },
+    // fontFamily, fontWeight, lineHeight
   },
   modes: {
     light: {
@@ -49,38 +60,82 @@ const theme = new DesignSystem(tokens);
 export default theme;
 ```
 
-### Responsive values and SSR
+### One scale, one root
 
-`fontSize()`, `spacing()` and `spacingBetween()` return CSS variables
-(`var(--ds-font-size-l)`), not literal values - the same way `color()` does
-for color modes. `breakpointCss()` defines those variables per breakpoint, via
-real `@media (min-width: …)` rules, so the browser picks the right value: no
-theme swap, no re-render, and no hydration mismatch from a server-side guess
-disagreeing with the client's real viewport.
+Font sizes and spacing are steps of one modular scale: `base` is `1rem`,
+every step up multiplies by `type.ratio` and every step down divides by it.
+Spacing follows the type, as in print - there's no separate spacing table.
+Only the root font size changes per breakpoint (`type.base`), so everything
+in rem grows or shrinks together and keeps its proportions.
+
+- `type.ratio` - set by whoever authors the tokens (1.333, a perfect fourth,
+  in the scaffolded template). The same at every breakpoint.
+- `type.floor` - the smallest a font size may resolve to, in rem. Spacing has
+  no floor.
+- `type.base` - the root font size per breakpoint, as a percentage of the
+  user's own browser setting. Never px: that would override the setting
+  (WCAG 1.4.4).
+- `breakpoints` - the width each breakpoint _starts_ at. The smallest is
+  `'0px'`.
+
+`SystemFontSize` is `'s' | 'base' | 'm' | 'l' | 'xl'`; `SystemSpacing` adds
+`'xxs'` and `'xs'` below them. Type stops at `s` because the floor would
+merge anything smaller into it.
+
+`rootCss()` emits the root font size per breakpoint (`@media (min-width: …)`)
+and the constant rem variables `fontSize()`, `spacing()`, `spacingBetween()`
+and `minTarget()` return, so the browser resolves the current breakpoint
+itself - no theme swap, no re-render, and no hydration mismatch from a
+server-side guess.
 
 ```ts
-const GlobalStyle = createGlobalStyle`
-  ${({ theme }) => theme.breakpointCss()}
+const RootStyle = createGlobalStyle`
+  ${({ theme }) => theme.rootCss()}
 `;
 ```
 
 Since the accessors return variables, JS math on them won't work (e.g.
-`parseFloat(theme.fontSize('l'))` is `NaN`). Reach for `getCurrentBreakpoint()`
-and the raw tokens (`getTokens()`) instead, for the rare case you need a JS
-number rather than a CSS value.
+`parseFloat(theme.fontSize('l'))` is `NaN`). `remToPx(value, breakpoint?)`
+converts at a breakpoint's root font size (the smallest by default),
+assuming the browser's default 16px.
 
-`getCurrentBreakpoint()` itself still resolves from the real viewport in the
-browser, or the `ssrBreakpoint` option where there's none (server rendering,
-plain Node) - the largest breakpoint by default, or the smallest for a
-mobile-first app:
+`getCurrentBreakpoint()` resolves from the real viewport in the browser, or
+the `ssrBreakpoint` option where there's none (server rendering, plain Node) -
+the largest breakpoint by default, or the smallest for a mobile-first app:
 
 ```ts
 const theme = new DesignSystem(tokens, { ssrBreakpoint: 'smallest' });
 ```
 
 It's a one-off synchronous read, not reactive - don't use it to render DOM
-that needs to match between server and client, since that reintroduces the
-hydration mismatch `fontSize()`/`spacing()`/`spacingBetween()` no longer have.
+that needs to match between server and client.
+
+## Accessibility
+
+- **Target size.** `minTarget()` is 24px (WCAG 2.5.8, AA) for a mouse or
+  trackpad and 44px (2.5.5, AAA) wherever a touch input is present
+  (`any-pointer: coarse`). It's px on purpose, and meant as a floor:
+  `min-block-size: max(${theme.minTarget()}, …)`.
+- **Focus.** `focus` is a palette color like any other - `color('focus')` is
+  the focus ring.
+- **`auditTokens(tokens)`** returns every WCAG AA failure the tokens alone
+  decide, plus the scale's own rules - empty when they comply. Run it as a
+  test in CI:
+
+  ```ts
+  expect(auditTokens(tokens)).toEqual([]);
+  ```
+
+  | Rule                | Checks                                                                                  |
+  | ------------------- | --------------------------------------------------------------------------------------- |
+  | `text-contrast`     | Every color's `text` on its `base` and `emphasis` is at least 4.5:1 (1.4.3).            |
+  | `ui-contrast`       | Every color but `background`/`formBackground` has a `base` of 3:1 on the page (1.4.11). |
+  | `unparseable-color` | A color the audit can't read - reported rather than silently passed.                    |
+  | `floor-raises-step` | The ratio is steep enough that the floor raises `fontSize('s')`.                        |
+  | `input-zoom`        | A breakpoint's root is under 100%, so inputs are under 16px and iOS zooms in on focus.  |
+  | `breakpoint-origin` | The smallest breakpoint doesn't start at 0.                                             |
+
+  `contrastRatio(foreground, background)` is exported for one-off checks.
 
 ## Color modes
 
@@ -154,41 +209,44 @@ const Card = styled.div`
 
 ## API
 
-| Method                                        | Params                                                                              | Returns            | Description                                                                                                                                                            |
-| --------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `color(hue, variant?)`                        | `hue: BaseColor`, `variant: BaseColorVariant = 'base'`                              | `CssVar`           | Color from your palette, following the current mode.                                                                                                                   |
-| `rawColor(hue, variant?, mode?)`              | `hue: BaseColor`, `variant: BaseColorVariant = 'base'`, `mode: ColorMode = 'light'` | `ColorString`      | Literal color value in one mode (light without dark tokens) - for JS color math.                                                                                       |
-| `gradient(variant?)`                          | `variant: SystemGradient = 'menu'`                                                  | `CssVar`           | Gradient from your gradient palette, following the current mode.                                                                                                       |
-| `boxShadow(variant?)`                         | `variant: SystemBoxShadow = 'base'`                                                 | `CssVar`           | Box-shadow value, following the current mode.                                                                                                                          |
-| `colorModeCss()`                              | -                                                                                   | `string`           | Global CSS defining the color variables the accessors return, per mode.                                                                                                |
-| `hasDarkMode()`                               | -                                                                                   | `boolean`          | Whether the tokens define `modes.dark`.                                                                                                                                |
-| `fontSize(size)` / `fs(size)`                 | `size: SystemSize`                                                                  | `CssVar`           | Font size, following the current breakpoint.                                                                                                                           |
-| `fontFamily(family)` / `ff(family)`           | `family: SystemFontFamily`                                                          | `string`           | Font family.                                                                                                                                                           |
-| `fontWeight(weight)` / `fw(weight)`           | `weight: SystemFontWeight`                                                          | `number`           | Font weight.                                                                                                                                                           |
-| `lineHeight(selector)` / `lh(selector)`       | `selector: SystemLineHeight`                                                        | `number`           | Line height.                                                                                                                                                           |
-| `spacing(size)` / `space(size)`               | `size: SystemSize`                                                                  | `CssVar`           | Spacing value, following the current breakpoint.                                                                                                                       |
-| `spacingBetween(a, b)` / `spaceBetween(a, b)` | `a: SystemSize, b: SystemSize`                                                      | `string`           | Absolute spacing between two sizes, as a `calc(abs(...))` expression.                                                                                                  |
-| `breakpointCss()`                             | -                                                                                   | `string`           | Global CSS defining the `fontSize()`/`spacing()`/`spacingBetween()` variables, per breakpoint.                                                                         |
-| `bp(breakpoint)`                              | `breakpoint: SystemBreakpoint`                                                      | `string`           | Raw breakpoint value.                                                                                                                                                  |
-| `zIndex(z)` / `z(z)`                          | `z: SystemZIndex`                                                                   | `number`           | Z-index value.                                                                                                                                                         |
-| `borderRadius(size)`                          | `size: SystemBorderRadius`                                                          | `string`           | Border radius.                                                                                                                                                         |
-| `borderWidth(size)`                           | `size: SystemBorderWidth`                                                           | `string`           | Border width.                                                                                                                                                          |
-| `mq`                                          | -                                                                                   | `MediaGenerator`   | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.greaterThan('tabletLandscape')`...` `` (also `lessThan`, `between`).   |
-| `getCurrentBreakpoint()`                      | -                                                                                   | `SystemBreakpoint` | Closest matching breakpoint for the current viewport; the `ssrBreakpoint` option when there's no viewport (SSR, Node). Not reactive - see "Responsive values and SSR". |
-| `getTokens()`                                 | -                                                                                   | `SystemTokens`     | The raw tokens object passed to the constructor.                                                                                                                       |
-| `remToPx(value)`                              | `value: number \| string`                                                           | `string` (px)      | Convert rem to px, with unit.                                                                                                                                          |
-| `remToPxRaw(value)`                           | `value: number \| string`                                                           | `number`           | Convert rem to px, number only.                                                                                                                                        |
-| `get(path)`                                   | `path: string`                                                                      | `unknown`          | Raw property-path lookup - escape hatch, not the default way in.                                                                                                       |
+| Method                                        | Params                                                                              | Returns            | Description                                                                                                                                                          |
+| --------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `color(hue, variant?)`                        | `hue: BaseColor`, `variant: BaseColorVariant = 'base'`                              | `CssVar`           | Color from your palette, following the current mode.                                                                                                                 |
+| `rawColor(hue, variant?, mode?)`              | `hue: BaseColor`, `variant: BaseColorVariant = 'base'`, `mode: ColorMode = 'light'` | `ColorString`      | Literal color value in one mode (light without dark tokens) - for JS color math.                                                                                     |
+| `gradient(variant?)`                          | `variant: SystemGradient = 'menu'`                                                  | `CssVar`           | Gradient from your gradient palette, following the current mode.                                                                                                     |
+| `boxShadow(variant?)`                         | `variant: SystemBoxShadow = 'base'`                                                 | `CssVar`           | Box-shadow value, following the current mode.                                                                                                                        |
+| `colorModeCss()`                              | -                                                                                   | `string`           | Global CSS defining the color variables the accessors return, per mode.                                                                                              |
+| `hasDarkMode()`                               | -                                                                                   | `boolean`          | Whether the tokens define `modes.dark`.                                                                                                                              |
+| `fontSize(size)` / `fs(size)`                 | `size: SystemFontSize`                                                              | `CssVar`           | Step of the type scale, in rem - never below `type.floor`.                                                                                                           |
+| `fontFamily(family)` / `ff(family)`           | `family: SystemFontFamily`                                                          | `string`           | Font family.                                                                                                                                                         |
+| `fontWeight(weight)` / `fw(weight)`           | `weight: SystemFontWeight`                                                          | `number`           | Font weight.                                                                                                                                                         |
+| `lineHeight(selector)` / `lh(selector)`       | `selector: SystemLineHeight`                                                        | `number`           | Line height.                                                                                                                                                         |
+| `spacing(size)` / `space(size)`               | `size: SystemSpacing`                                                               | `CssVar`           | Step of the spacing scale (same ratio as type), in rem.                                                                                                              |
+| `spacingBetween(a, b)` / `spaceBetween(a, b)` | `a: SystemSpacing, b: SystemSpacing`                                                | `string`           | Difference between two spacing steps, as a `calc()` expression.                                                                                                      |
+| `rootCss()`                                   | -                                                                                   | `string`           | Global CSS: the root font size per breakpoint, the scale variables and `minTarget()`.                                                                                |
+| `minTarget()`                                 | -                                                                                   | `CssVar`           | Minimum interactive target size - 24px, or 44px with a touch input.                                                                                                  |
+| `bp(breakpoint)`                              | `breakpoint: SystemBreakpoint`                                                      | `string`           | Raw breakpoint value.                                                                                                                                                |
+| `zIndex(z)` / `z(z)`                          | `z: SystemZIndex`                                                                   | `number`           | Z-index value.                                                                                                                                                       |
+| `borderRadius(size)`                          | `size: SystemBorderRadius`                                                          | `string`           | Border radius.                                                                                                                                                       |
+| `borderWidth(size)`                           | `size: SystemBorderWidth`                                                           | `string`           | Border width.                                                                                                                                                        |
+| `mq`                                          | -                                                                                   | `MediaGenerator`   | Media-query generator (from `styled-media-query`) built off your breakpoints - e.g. `` theme.mq.greaterThan('tabletLandscape')`...` `` (also `lessThan`, `between`). |
+| `getCurrentBreakpoint()`                      | -                                                                                   | `SystemBreakpoint` | Widest breakpoint the viewport has reached; the `ssrBreakpoint` option when there's no viewport (SSR, Node). Not reactive.                                           |
+| `getTokens()`                                 | -                                                                                   | `SystemTokens`     | The raw tokens object passed to the constructor.                                                                                                                     |
+| `remToPx(value, breakpoint?)`                 | `value: number \| string`, `breakpoint: SystemBreakpoint`                           | `string` (px)      | Convert rem to px at a breakpoint's root font size (the smallest by default).                                                                                        |
+| `remToPxRaw(value, breakpoint?)`              | `value: number \| string`, `breakpoint: SystemBreakpoint`                           | `number`           | Convert rem to px, number only.                                                                                                                                      |
+| `get(path)`                                   | `path: string`                                                                      | `unknown`          | Raw property-path lookup - escape hatch, not the default way in.                                                                                                     |
 
-`SystemSize` is `'xxs' \| 'xs' \| 's' \| 'base' \| 'm' \| 'l' \| 'xl'`.
-`BaseColor`, `SystemBreakpoint`, `SystemZIndex`, `SystemBoxShadow`,
+`SystemFontSize` is `'s' \| 'base' \| 'm' \| 'l' \| 'xl'`, and `SystemSpacing`
+adds `'xxs' \| 'xs'`. `BaseColor`, `SystemBreakpoint`, `SystemZIndex`, `SystemBoxShadow`,
 `SystemGradient`, `SystemFontFamily`, `SystemFontWeight`, `SystemLineHeight`,
 `SystemBorderRadius` and `SystemBorderWidth` are the other
 key-unions each accessor takes - all exported from the package, all part of
 the published contract (see [`src/tokens.ts`](src/tokens.ts) and
 [`src/colorPalette.ts`](src/colorPalette.ts) for the exact members).
 
-Standalone exports: `colorModeScript(options?)`, `getColorMode(options?)`,
+Standalone exports: `auditTokens(tokens)`, `contrastRatio(fg, bg)`,
+`MIN_TEXT_CONTRAST`, `MIN_UI_CONTRAST` (see [Accessibility](#accessibility)),
+`colorModeScript(options?)`, `getColorMode(options?)`,
 `setColorMode(mode, options?)` and `COLOR_MODE_META` (`'ds-color-mode'`) -
 see [Color modes](#color-modes).
 

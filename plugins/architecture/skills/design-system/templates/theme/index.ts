@@ -2,13 +2,20 @@ import DesignSystem, { type SystemTokens } from '@pindakaasman/design-system';
 
 const tokens: SystemTokens = {
   breakpoints: {
-    mobile: '375px',
+    mobile: '0px',
     tablet: '768px',
     tabletLandscape: '1024px',
     desktop: '1440px',
   },
   type: {
-    baseFontSize: '16px',
+    ratio: 1.333,
+    floor: 0.75,
+    base: {
+      mobile: '100%',
+      tablet: '100%',
+      tabletLandscape: '106.25%',
+      desktop: '112.5%',
+    },
     fontFamily: {
       base: 'system-ui, sans-serif',
       heading: 'system-ui, sans-serif',
@@ -25,63 +32,26 @@ const tokens: SystemTokens = {
       base: 1.5,
       loose: 1.8,
     },
-    sizes: {
-      mobile: {
-        xxs: '10px',
-        xs: '12px',
-        s: '14px',
-        base: '16px',
-        m: '20px',
-        l: '24px',
-        xl: '32px',
-      },
-      tablet: {
-        xxs: '10px',
-        xs: '12px',
-        s: '14px',
-        base: '16px',
-        m: '22px',
-        l: '28px',
-        xl: '36px',
-      },
-      tabletLandscape: {
-        xxs: '12px',
-        xs: '14px',
-        s: '16px',
-        base: '18px',
-        m: '22px',
-        l: '28px',
-        xl: '40px',
-      },
-      desktop: {
-        xxs: '12px',
-        xs: '14px',
-        s: '16px',
-        base: '18px',
-        m: '24px',
-        l: '32px',
-        xl: '48px',
-      },
-    },
   },
   modes: {
     light: {
       colorPalette: {
-        error: { base: '#e5484d', text: '#ffffff', emphasis: '#b3221f' },
+        error: { base: '#c62828', text: '#ffffff', emphasis: '#8e1b1b' },
         formBackground: {
           base: '#f5f5f5',
           text: '#1a1a1a',
           emphasis: '#e0e0e0',
         },
         background: { base: '#ffffff', text: '#1a1a1a', emphasis: '#f0f0f0' },
-        primary: { base: '#3b82f6', text: '#ffffff', emphasis: '#1d4ed8' },
+        primary: { base: '#2563eb', text: '#ffffff', emphasis: '#1d4ed8' },
         secondary: { base: '#6b7280', text: '#ffffff', emphasis: '#374151' },
-        tertiary: { base: '#8b5cf6', text: '#ffffff', emphasis: '#5b21b6' },
-        quaternary: { base: '#f59e0b', text: '#1a1a1a', emphasis: '#b45309' },
+        tertiary: { base: '#7c3aed', text: '#ffffff', emphasis: '#5b21b6' },
+        quaternary: { base: '#b45309', text: '#ffffff', emphasis: '#92400e' },
+        focus: { base: '#1d4ed8', text: '#ffffff', emphasis: '#1d4ed8' },
       },
       gradient: {
-        menu: 'linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%)',
-        hero: 'linear-gradient(90deg, #8b5cf6 0%, #3b82f6 100%)',
+        menu: 'linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%)',
+        hero: 'linear-gradient(90deg, #7c3aed 0%, #2563eb 100%)',
       },
       boxShadow: {
         base: '0 1px 2px rgba(0, 0, 0, 0.08)',
@@ -102,6 +72,7 @@ const tokens: SystemTokens = {
         secondary: { base: '#9ca3af', text: '#111111', emphasis: '#d1d5db' },
         tertiary: { base: '#a78bfa', text: '#111111', emphasis: '#c4b5fd' },
         quaternary: { base: '#fbbf24', text: '#1a1a1a', emphasis: '#fcd34d' },
+        focus: { base: '#93c5fd', text: '#0b1220', emphasis: '#93c5fd' },
       },
       gradient: {
         menu: 'linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%)',
@@ -120,46 +91,6 @@ const tokens: SystemTokens = {
     sticky: 200,
     modal: 300,
     toast: 400,
-  },
-  spacing: {
-    scale: {
-      mobile: {
-        xxs: '2px',
-        xs: '4px',
-        s: '8px',
-        base: '16px',
-        m: '24px',
-        l: '32px',
-        xl: '48px',
-      },
-      tablet: {
-        xxs: '2px',
-        xs: '4px',
-        s: '8px',
-        base: '16px',
-        m: '24px',
-        l: '40px',
-        xl: '56px',
-      },
-      tabletLandscape: {
-        xxs: '4px',
-        xs: '8px',
-        s: '12px',
-        base: '20px',
-        m: '32px',
-        l: '40px',
-        xl: '56px',
-      },
-      desktop: {
-        xxs: '4px',
-        xs: '8px',
-        s: '12px',
-        base: '20px',
-        m: '32px',
-        l: '48px',
-        xl: '64px',
-      },
-    },
   },
   border: {
     radius: { s: '4px', base: '8px', full: '9999px' },

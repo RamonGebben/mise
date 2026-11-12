@@ -15,23 +15,37 @@ import type {
   SystemFontWeight,
   SystemGradient,
   SystemLineHeight,
-  SystemSize,
   SystemZIndex,
 } from './tokens.js';
 import type { BaseColor, BaseColorVariant } from './colorPalette.js';
 import type { ColorString } from './types.js';
 
-/** A pixel value per size, as `'16px'` or `16`. */
-export type SystemFontSizes = Record<SystemSize, string | number>;
+/**
+ * The root font size at one breakpoint, as a percentage of the user's own
+ * browser setting - never px, which would override that setting (WCAG 1.4.4).
+ */
+export type RootFontSize = `${number}%`;
 
 export interface SystemType {
-  baseFontSize: string | number;
+  /**
+   * The modular-scale ratio every font-size and spacing step is a power of
+   * (`base` is 1rem, `m` is `ratio` rem, `s` is `1 / ratio` rem, …). The same
+   * at every breakpoint - only `base` changes per breakpoint.
+   */
+  ratio: number;
+  /** The smallest a font size may resolve to, in rem. Doesn't apply to spacing. */
+  floor: number;
+  /** The root font size per breakpoint, which every rem value scales with. */
+  base: Record<SystemBreakpoint, RootFontSize>;
   fontFamily: Record<SystemFontFamily, string>;
   fontWeight: Record<SystemFontWeight, number>;
-  sizes: Record<SystemBreakpoint, SystemFontSizes>;
   lineHeight: Record<SystemLineHeight, number>;
 }
 
+/**
+ * The width each breakpoint starts at (`min-width`). The smallest should be
+ * `'0px'`: it applies everywhere below the next one anyway.
+ */
 export type SystemBreakpoints = Record<SystemBreakpoint, string>;
 
 export type SystemColorPaletteColor = Record<BaseColorVariant, ColorString>;
@@ -40,7 +54,7 @@ export type SystemColorPalette = Record<BaseColor, SystemColorPaletteColor>;
 
 /**
  * Every token that holds a color, and so changes between color modes.
- * Everything else (type, spacing, breakpoints, …) is the same in every mode.
+ * Everything else (type, breakpoints, …) is the same in every mode.
  */
 export interface SystemModeTokens {
   colorPalette: SystemColorPalette;
@@ -59,13 +73,6 @@ export interface SystemModes {
 
 export type SystemZIndexScale = Record<SystemZIndex, number>;
 
-/** A pixel value per size, as `'16px'` or `16`. */
-export type SystemScale = Record<SystemSize, string | number>;
-
-export interface SystemSpacing {
-  scale: Record<SystemBreakpoint, SystemScale>;
-}
-
 export interface SystemBorder {
   radius: Record<SystemBorderRadius, string>;
   width: Record<SystemBorderWidth, string>;
@@ -76,7 +83,6 @@ export interface System {
   breakpoints: SystemBreakpoints;
   modes: SystemModes;
   zIndex: SystemZIndexScale;
-  spacing: SystemSpacing;
   border: SystemBorder;
 }
 

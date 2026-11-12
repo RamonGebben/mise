@@ -8,7 +8,13 @@ export type SystemBreakpoint =
 
 export type SystemBreakpointMap = Record<SystemBreakpoint, string>;
 
-export type SystemSize = 'xxs' | 'xs' | 's' | 'base' | 'm' | 'l' | 'xl';
+// Steps of the one modular scale both font sizes and spacing follow - `base`
+// is step 0, each step up or down multiplies or divides by `type.ratio`.
+// Spacing reaches further down than type: the legibility floor that would
+// merge type's smaller steps doesn't apply to whitespace.
+export type SystemFontSize = 's' | 'base' | 'm' | 'l' | 'xl';
+
+export type SystemSpacing = 'xxs' | 'xs' | 's' | 'base' | 'm' | 'l' | 'xl';
 
 export type SystemFontWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
