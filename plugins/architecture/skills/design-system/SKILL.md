@@ -34,8 +34,10 @@ accessors rely on - which a plain object can't express. A class also gives
 every token a typed accessor (`color(hue,
 variant)`, `boxShadow(variant)`, …) instead of an arbitrary string path that
 only fails at runtime when it's wrong, and bundles the matching `mq` media
-query generator (from `styled-media-query`) off the same breakpoints so
-queries and token resolution never drift apart.
+query generator off the same breakpoints so queries and token resolution
+never drift apart. `mq.greaterThan(bp)` starts exactly where `bp`'s root
+font size does, and `mq.lessThan(bp)` stops just before it (range syntax,
+`width < …`), so no width matches both.
 
 ## What's published vs. what's scaffolded
 

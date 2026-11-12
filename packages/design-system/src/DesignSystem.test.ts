@@ -519,24 +519,30 @@ describe('DesignSystem', () => {
   });
 
   describe('mq', () => {
-    it('lessThan wraps styles in a max-width query for the breakpoint', () => {
+    it('lessThan stops just before the width the breakpoint starts at', () => {
       expect(cssText(theme.mq.lessThan('tablet')`color: red;`)).toBe(
-        '@media (max-width: 768px) { color: red; }',
+        '@media (width < 768px) { color: red; }',
       );
     });
 
-    it('greaterThan wraps styles in a min-width query for the breakpoint', () => {
+    it('greaterThan starts at the width the breakpoint starts at', () => {
       expect(cssText(theme.mq.greaterThan('desktop')`color: red;`)).toBe(
-        '@media (min-width: 1440px) { color: red; }',
+        '@media (width >= 1440px) { color: red; }',
       );
     });
 
-    it('between wraps styles in a min- and max-width query', () => {
+    it('between runs from one breakpoint up to just before the next', () => {
       expect(
         cssText(theme.mq.between('tablet', 'tabletLandscape')`color: red;`),
-      ).toBe(
-        '@media (min-width: 768px) and (max-width: 1024px) { color: red; }',
-      );
+      ).toBe('@media (768px <= width < 1024px) { color: red; }');
+    });
+
+    it('passes interpolations through', () => {
+      expect(
+        cssText(
+          theme.mq.greaterThan('tablet')`padding: ${theme.spacing('l')};`,
+        ),
+      ).toBe('@media (width >= 768px) { padding: var(--ds-spacing-l); }');
     });
   });
 });

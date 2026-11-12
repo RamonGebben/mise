@@ -138,6 +138,13 @@ split) Next's App Router.
     (`html`/`:root` `font-size` in global CSS or a global style) is
     removed - `rootCss()` owns it. If it was there to scale the UI, fold
     it into `type.base` instead.
+  - **`styled-components` below `^6`** → propose bumping it; `^4` needs
+    it as a peer.
+  - **`mq.lessThan()` call sites** - it now stops just before the
+    breakpoint's start width instead of including it. Nothing to change
+    unless a style relied on matching that exact width; list any
+    `lessThan`/`greaterThan` pair on the same breakpoint written to
+    paper over the old 1px overlap, so the workaround can go.
   - **`remToPx()`/`remToPxRaw()` call sites** - list each as a case
     needing a human call: they now convert at a breakpoint's root (the
     smallest by default), so check which breakpoint the number was for.

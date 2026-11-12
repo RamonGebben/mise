@@ -1,4 +1,3 @@
-import { generateMedia, MediaGenerator } from 'styled-media-query';
 import {
   SystemBorderRadius,
   SystemBorderWidth,
@@ -9,7 +8,6 @@ import {
   SystemLineHeight,
   SystemSpacing,
   SystemZIndex,
-  SystemBreakpointMap,
   SystemBoxShadow,
   type SystemGradient,
 } from './tokens.js';
@@ -18,6 +16,7 @@ import type { SystemModeTokens, SystemTokens } from './system.js';
 import { path } from 'ramda';
 import type { ColorString, CssVar } from './types.js';
 import { COLOR_MODE_META, type ColorMode } from './colorMode.js';
+import { generateMedia, type MediaGenerator } from './media.js';
 import {
   FONT_SIZE_STEPS,
   fontSizeRem,
@@ -123,7 +122,7 @@ export default class DesignSystem {
    * mq()
    * get media query breakpoint name
    */
-  public mq: MediaGenerator<SystemBreakpointMap, DesignSystem>;
+  public mq: MediaGenerator;
 
   constructor(tokens: SystemTokens, options: DesignSystemOptions = {}) {
     this.ds = tokens;

@@ -42,6 +42,8 @@ export type { BaseColor, BaseColorVariant } from './colorPalette.js';
 
 export type { ColorString, CssVar } from './types.js';
 
+export type { MediaGenerator, MediaTemplate } from './media.js';
+
 export {
   COLOR_MODE_META,
   colorModeScript,

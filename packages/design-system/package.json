@@ -34,11 +34,10 @@
     "typecheck": "tsc -p tsconfig.typecheck.json"
   },
   "dependencies": {
-    "ramda": "^0.30.0",
-    "styled-media-query": "^2.1.2"
+    "ramda": "^0.30.0"
   },
   "peerDependencies": {
-    "styled-components": ">=5"
+    "styled-components": ">=6"
   },
   "devDependencies": {
     "@pindakaasman/tsconfig": "workspace:*",
