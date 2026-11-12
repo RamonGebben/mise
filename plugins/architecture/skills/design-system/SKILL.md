@@ -140,7 +140,9 @@ its responsiveness for free.
   method would be one more thing to reason about and adopt. There's no
   spacing table to tune.
 - **The ratio is the token author's call** - 1.333 (a perfect fourth) in the
-  template. Only `type.base` changes per breakpoint, never the ratio.
+  template. Only `type.base` changes per breakpoint, never the ratio. It
+  must be above 1 - at or below it the scale doesn't grow, and the audit
+  flags it.
 - **`type.base` is a percentage, never px.** **Why:** `font-size: 12px` on
   the root overrides the user's own browser text size (WCAG 1.4.4); `75%`
   scales with it.

@@ -126,14 +126,15 @@ that needs to match between server and client.
   expect(auditTokens(tokens)).toEqual([]);
   ```
 
-  | Rule                | Checks                                                                                  |
-  | ------------------- | --------------------------------------------------------------------------------------- |
-  | `text-contrast`     | Every color's `text` on its `base` and `emphasis` is at least 4.5:1 (1.4.3).            |
-  | `ui-contrast`       | Every color but `background`/`formBackground` has a `base` of 3:1 on the page (1.4.11). |
-  | `unparseable-color` | A color the audit can't read - reported rather than silently passed.                    |
-  | `floor-raises-step` | The ratio is steep enough that the floor raises `fontSize('s')`.                        |
-  | `input-zoom`        | A breakpoint's root is under 100%, so inputs are under 16px and iOS zooms in on focus.  |
-  | `breakpoint-origin` | The smallest breakpoint doesn't start at 0.                                             |
+  | Rule                  | Checks                                                                                  |
+  | --------------------- | --------------------------------------------------------------------------------------- |
+  | `text-contrast`       | Every color's `text` on its `base` and `emphasis` is at least 4.5:1 (1.4.3).            |
+  | `ui-contrast`         | Every color but `background`/`formBackground` has a `base` of 3:1 on the page (1.4.11). |
+  | `unparseable-color`   | A color the audit can't read - reported rather than silently passed.                    |
+  | `ratio-not-ascending` | `type.ratio` is 1 or less, so the scale doesn't grow.                                   |
+  | `floor-raises-step`   | The ratio is steep enough that the floor raises `fontSize('s')`.                        |
+  | `input-zoom`          | A breakpoint's root is under 100%, so inputs are under 16px and iOS zooms in on focus.  |
+  | `breakpoint-origin`   | The smallest breakpoint doesn't start at 0.                                             |
 
   `contrastRatio(foreground, background)` is exported for one-off checks.
 

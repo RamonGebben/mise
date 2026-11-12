@@ -117,6 +117,8 @@ export type DesignSystemOptions = {
 export default class DesignSystem {
   private ds: SystemTokens;
   private ssrBreakpoint: NonNullable<DesignSystemOptions['ssrBreakpoint']>;
+  /** The breakpoints narrowest first, sorted once rather than per call. */
+  private breakpoints: Array<SystemBreakpoint>;
 
   /**
    * mq()
@@ -128,6 +130,7 @@ export default class DesignSystem {
     this.ds = tokens;
     this.ssrBreakpoint = options.ssrBreakpoint ?? 'largest';
     this.mq = generateMedia(this.ds.breakpoints);
+    this.breakpoints = sortedBreakpoints(this.ds);
   }
 
   /**
@@ -337,7 +340,7 @@ export default class DesignSystem {
    * hydration mismatch.
    */
   public rootCss(): string {
-    const [smallest, ...rest] = sortedBreakpoints(this.ds);
+    const [smallest, ...rest] = this.breakpoints;
     const rootSize = (breakpoint: SystemBreakpoint) =>
       block(':root', [`font-size: ${this.ds.type.base[breakpoint]};`]);
 
@@ -424,7 +427,7 @@ export default class DesignSystem {
    * from it (as opposed to CSS) can cause a hydration mismatch.
    */
   public getCurrentBreakpoint(): SystemBreakpoint {
-    const sorted = sortedBreakpoints(this.ds);
+    const sorted = this.breakpoints;
     const [smallest] = sorted;
     const largest = sorted[sorted.length - 1];
 
@@ -449,10 +452,7 @@ export default class DesignSystem {
     value: number | string,
     breakpoint?: SystemBreakpoint,
   ): string {
-    const rootPx = rootFontSizePx(
-      this.ds,
-      breakpoint ?? sortedBreakpoints(this.ds)[0],
-    );
+    const rootPx = rootFontSizePx(this.ds, breakpoint ?? this.breakpoints[0]);
 
     return `${parseFloat(`${value}`) * rootPx}px`;
   }

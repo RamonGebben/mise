@@ -85,6 +85,22 @@ describe('contrastRatio', () => {
   it('is undefined for a color it cannot parse', () => {
     expect(contrastRatio('papayawhip', '#ffffff')).toBeUndefined();
   });
+
+  it('is undefined for a function with a missing or unreadable channel', () => {
+    expect(contrastRatio('rgb(255 255 255)', '#ffffff')).toBeUndefined();
+    expect(contrastRatio('rgb(0,0)', '#ffffff')).toBeUndefined();
+  });
+
+  it('reads a percentage rgb channel as a fraction of 255', () => {
+    expect(contrastRatio('rgb(100%,100%,100%)', '#000')).toBeCloseTo(21);
+  });
+
+  it('composites a translucent background over the backdrop', () => {
+    expect(
+      contrastRatio('#ffffff', 'rgba(0,0,0,0.05)', '#ffffff'),
+    ).toBeLessThan(1.2);
+    expect(contrastRatio('#ffffff', 'rgba(0,0,0,0.05)')).toBeUndefined();
+  });
 });
 
 describe('auditTokens', () => {
@@ -148,11 +164,34 @@ describe('auditTokens', () => {
     expect(failing[0].message).toMatch(/^dark: primary.text on primary.base/);
   });
 
+  it('checks a translucent emphasis as it renders on the page', () => {
+    expect(
+      rules(withColor('background', { emphasis: 'rgba(0,0,0,0.05)' })),
+    ).toEqual([]);
+    expect(
+      rules(
+        withColor('primary', {
+          text: '#ffffff',
+          emphasis: 'rgba(0,0,0,0.05)',
+        }),
+      ),
+    ).toContain('text-contrast');
+  });
+
   it('reports a color it cannot parse instead of passing it', () => {
     expect(rules(withColor('error', { text: 'white' as '#fff' }))).toContain(
       'unparseable-color',
     );
   });
+
+  it.each([1, 0.8])(
+    'flags a ratio of %s, where the scale does not grow',
+    ratio => {
+      expect(rules({ ...tokens, type: { ...tokens.type, ratio } })).toContain(
+        'ratio-not-ascending',
+      );
+    },
+  );
 
   it('flags a ratio steep enough for the floor to raise the s step', () => {
     expect(rules({ ...tokens, type: { ...tokens.type, ratio: 1.5 } })).toEqual([

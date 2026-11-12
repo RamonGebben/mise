@@ -23,6 +23,7 @@ export type AuditRule =
   | 'text-contrast'
   | 'ui-contrast'
   | 'unparseable-color'
+  | 'ratio-not-ascending'
   | 'floor-raises-step'
   | 'input-zoom'
   | 'breakpoint-origin';
@@ -57,13 +58,24 @@ const parseFunction = (color: string): Rgba | undefined => {
   const match = /^(rgba?|cmyk)\(([^)]*)\)$/i.exec(color.trim());
   if (!match) return undefined;
 
-  const [, name, args] = match;
-  const values = args.split(',').map(arg => {
-    const number = parseFloat(arg);
-    return arg.trim().endsWith('%') ? number / 100 : number;
+  const [, rawName, args] = match;
+  const name = rawName.toLowerCase();
+  const parts = args.split(',').map(arg => arg.trim());
+  const arity = name === 'rgb' ? [3] : name === 'rgba' ? [3, 4] : [4];
+
+  if (!arity.includes(parts.length)) return undefined;
+
+  // A percentage is a fraction of the channel's range: 0-255 for an rgb
+  // channel, 0-1 for alpha and every cmyk component.
+  const values = parts.map((part, index) => {
+    const number = Number(part.endsWith('%') ? part.slice(0, -1) : part);
+    if (!part.endsWith('%')) return number;
+    return name !== 'cmyk' && index < 3 ? (number / 100) * 255 : number / 100;
   });
 
-  if (name.toLowerCase() === 'cmyk') {
+  if (values.some(value => !Number.isFinite(value))) return undefined;
+
+  if (name === 'cmyk') {
     const [c, m, y, k] = values;
     return [
       255 * (1 - c) * (1 - k),
@@ -88,6 +100,10 @@ const composite = ([r, g, b, a]: Rgba, [br, bg, bb]: Rgba): Rgba => [
   1,
 ];
 
+/** A translucent background as it renders on top of an opaque backdrop. */
+const opaque = (color: Rgba, backdrop: Rgba | undefined): Rgba | undefined =>
+  color[3] >= 1 ? color : backdrop && composite(color, backdrop);
+
 const luminance = ([r, g, b]: Rgba): number => {
   const linear = (channel: number) => {
     const c = channel / 255;
@@ -99,15 +115,21 @@ const luminance = ([r, g, b]: Rgba): number => {
 
 /**
  * The WCAG contrast ratio of a foreground on a background, from 1 to 21. A
- * translucent foreground is composited over the background first. Undefined
- * when either color can't be parsed.
+ * translucent foreground is composited over the background first, and a
+ * translucent background over `backdrop` (what shows through it). Undefined
+ * when a color can't be parsed, or the background is translucent without a
+ * backdrop to composite it over.
  */
 export const contrastRatio = (
   foreground: string,
   background: string,
+  backdrop?: string,
 ): number | undefined => {
   const fg = parseColor(foreground);
-  const bg = parseColor(background);
+  const backdropColor =
+    backdrop === undefined ? undefined : parseColor(backdrop);
+  const parsedBg = parseColor(background);
+  const bg = parsedBg && opaque(parsedBg, backdropColor);
   if (!fg || !bg) return undefined;
 
   const [lighter, darker] = [luminance(composite(fg, bg)), luminance(bg)].sort(
@@ -137,14 +159,15 @@ const modeFindings = (
   ): Array<AuditFinding> => {
     const fg = palette[fgHue][fgVariant];
     const bg = palette[bgHue][bgVariant];
-    const ratio = contrastRatio(fg, bg);
+    // A translucent color sits on the page, so the page shows through it.
+    const ratio = contrastRatio(fg, bg, palette.background.base);
     const pair = `${colorName(fgHue, fgVariant)} on ${colorName(bgHue, bgVariant)}`;
 
     if (ratio === undefined) {
       return [
         {
           rule: 'unparseable-color',
-          message: `${mode}: can't check ${pair} - ${fg} or ${bg} isn't a color this audit can parse`,
+          message: `${mode}: can't check ${pair} - ${fg} or ${bg} isn't a color this audit can parse, or the page background is translucent`,
         },
       ];
     }
@@ -179,14 +202,23 @@ const modeFindings = (
 };
 
 const scaleFindings = (tokens: SystemTokens): Array<AuditFinding> => {
-  const [smallest] = sortedBreakpoints(tokens);
+  const breakpoints = sortedBreakpoints(tokens);
+  const [smallest] = breakpoints;
   const unflooredS = unflooredFontSizeRem(tokens, 's');
-  const belowDefault = sortedBreakpoints(tokens).filter(
+  const belowDefault = breakpoints.filter(
     breakpoint =>
       rootFontSizePx(tokens, breakpoint) < BROWSER_DEFAULT_FONT_SIZE,
   );
 
   return [
+    ...(tokens.type.ratio > 1
+      ? []
+      : [
+          {
+            rule: 'ratio-not-ascending' as const,
+            message: `type.ratio is ${tokens.type.ratio}, so each step is no larger than the one below it - pick a ratio above 1`,
+          },
+        ]),
     ...(unflooredS < tokens.type.floor
       ? [
           {
